@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="sidebar-menu" class="main_menu_side hidden-print main_menu" th:fragment="menu">
+    <div class="menu_section">
+        <h3>GENERAL</h3>
+        <ul class="nav side-menu" >
+            <li th:each="menu : ${menus}" th:id="${menu.idMenu}">
+                <a>
+<!--                    <i class="fa fa-home"></i>-->
+                    <span th:text="${menu.name}" style="zzdisplay: inline;"></span>
+                    <span class="fa fa-chevron-down"></span>
+                </a>
+                <ul class="nav child_menu">
+                    <li th:each="child : ${menu.child}">
+                        <a th:href="@{${child.url}}" th:text="${child.name}" methods="GET"></a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

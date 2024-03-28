@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{index::layout(~{::div})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Category List</title>
+</head>
+<body>
+<div class="right_col" role="main">
+    <div class="">
+        <div class="row" style="display: block;">
+            <div class="clearfix"></div>
+            <div class="col-md-12 col-sm-12 float-none">
+                <!--                alert message-->
+                <div id="alert-container-success" style="position: fixed; right: 1px; z-index: 1000">
+                    <div class="alert alert-success" th:if="${param.success}">Successfully!!!</div>
+                </div>
+                <div id="alert-container" style="position: fixed; right: 1px; z-index: 1000">
+                </div>
+
+                <div class="x_panel">
+                    <div th:object="${invoices}">
+                        <div class="x_title row">
+                            <h2 th:text="${invoices.type == 1 ? 'Goods Receipt List' : 'Goods Issue List'}"
+                                class="col-md-2"></h2>
+                            <form th:action="@{${invoices.url} + '/list'}" id="form-submit" data-parsley-validate
+                                  class="col-md-7 form-horizontal form-label-left"
+                                  method="get">
+                                <div class="col-md-5 col-sm-5  form-group pull-right top_search">
+                                    <div class="input-group">
+                                        <input id="search" th:field="*{keyword}" type="text"
+                                               name="keyword" class="form-control" placeholder="Enter Name...">
+                                        <span class="input-group-btn">
+										<button class="btn btn-secondary" type="submit">Search</button>
+									</span>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="col-md-1">
+                                <a th:href="${invoices.url + '/export'}" style="height: auto"
+                                   class="btn btn-app fa fa-cloud-download">Export</a>
+                            </div>
+                            <div class="col-md-2">
+                                <a th:href="${invoices.url + '/add'}" style="color: white"
+                                   class="btn btn-round btn-primary">Add</a>
+                                <button id="btnDelete" type="button" style="color: white"
+                                        class="btn btn-round btn-danger">
+                                    Delete
+                                </button>
+                            </div>
+                            <form action="" id="formSubmit" method="get">
+                                <input type="hidden" th:field="*{page}" id="page" name="page">
+                                <input type="hidden" th:field="*{keyword}" id="keyword" name="keyword">
+                                <input type="hidden" th:field="*{categoryCode}" id="categoryCode" name="categoryCode">
+                                <input type="hidden" th:field="*{fromDate}" id="fromDate" name="fromDate">
+                                <input type="hidden" th:field="*{toDate}" id="toDate" name="toDate">
+                            </form>
+                        </div>
+
+                        <div class="x_title row justify-content-md-end">
+                            <form th:action="@{${invoices.url} + '/list'}" id="form-filter"
+                                  data-parsley-validate
+                                  class="form-horizontal form-label-left col-md-1"
+                                  method="get">
+                                <div class=" form-group">
+                                    <label class="row col-form-label label-align" for="form-filter">Category
+                                    </label>
+                                    <select id="filterByCategory" th:field="*{categoryCode}" class="row "
+                                            name="categoryId" style="color: #73879C;">
+                                        <option value="">All</option>
+                                        <option th:each="cate : ${categories}"
+                                                th:value="${cate.code}"
+                                                th:text="${cate.name}"
+                                                th:selected="${cate.code == categoryCode}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <input type="hidden" th:field="*{fromDate}" id="fromDateFilter" name="fromDate">
+                                <input type="hidden" th:field="*{toDate}" id="toDateFilter" name="toDate">
+                                <input type="hidden" th:field="*{keyword}" id="keywordInCate" name="keyword">
+                            </form>
+
+                            <div class="col-md-2">
+                                <div class="row form-group">
+                                    <label class="row col-md-5 col-form-label label-align" for="fromDate">From Date
+                                    </label>
+                                    <div class="col-md-7 col-sm-7 ">
+                                        <input id="fromDateForm" class="" style="color: #73879C;" type="date"
+                                               name="date" required="required">
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <label class="row col-md-5 col-form-label label-align" for="toDate">To Date
+                                    </label>
+                                    <div class="col-md-7 col-sm-7 ">
+                                        <input id="toDateForm" class="" style="color: #73879C;" type="date" name="date"
+                                               required="required">
+                                    </div>
+                                </div>
+                                <div class="row justify-content-md-center">
+                                    <button type="button" id="btnDate" class=""
+                                            style="background-color: #2aabd2; border-radius: 4px; border: none">
+                                        Apply
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--                    <div class="clearfix"></div>-->
+
+                    <div class="x_content">
+
+                        <!--                        <p>Add class <code>bulk_action</code> to table for bulk actions options on row select</p>-->
+
+                        <div th:if="${#lists.size(invoices.listResult) == 0}">
+                            <h2>No Items</h2>
+                        </div>
+                        <div th:unless="${#lists.size(invoices.listResult) == 0}"
+                             class="table-responsive overflow-hidden">
+                            <div style="min-height: 45vh">
+
+                                <table class="table table-striped jambo_table bulk_action">
+                                    <thead>
+                                    <tr class="headings">
+<!--                                        <th>-->
+<!--                                            <input type="checkbox" id="check-all" class="flat">-->
+<!--                                        </th>-->
+                                        <th class="column-title">No</th>
+                                        <th class="column-title">Code</th>
+                                        <th class="column-title">Product</th>
+                                        <th class="column-title">Quantity</th>
+                                        <th class="column-title">Price</th>
+                                        <th class="column-title">Created Date</th>
+                                        <th class="column-title">Modified Date</th>
+                                        <!--                                    <th class="column-title">Ngày sửa</th>-->
+                                        <th class="column-title no-link last"><span class="nobr">Action</span>
+                                        </th>
+                                        <th class="bulk-actions" colspan="8">
+                                            <a class="antoo" style="color:#fff; font-weight:500;"><span
+                                                    class="action-cnt"> </span></a>
+                                        </th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    <tr class="even pointer" th:each="invoice, stat : ${invoices.listResult}">
+<!--                                        <td class="a-center ">-->
+<!--                                            <input type="checkbox" class="flat" name="table_records"-->
+<!--                                                   th:value="${invoice.id}">-->
+<!--                                        </td>-->
+                                        <td class=" "
+                                            th:text="${(invoices.page - 1) * invoices.size + stat.index + 1}"></td>
+                                        <td class=" " th:text="${invoice.code}"></td>
+                                        <td class=" " th:text="${invoice.productInfo.name}"></td>
+                                        <td class=" " th:text="${invoice.qty}"></td>
+                                        <td class="product-price " th:text="${invoice.price}"></td>
+                                        <td class=" " th:text="${invoice.createdDate}"></td>
+                                        <td class=" " th:text="${invoice.modifiedDate}"></td>
+                                        <td class=" last">
+                                            <a th:href="${invoices.url +'/edit/' + invoice.code}"
+                                               class="btn btn-round btn-info">Edit</a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <ul class="pagination justify-content-center" id="pagination"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        let goodsReceiptURL = [[${invoices.url}]] + 'list';
+        $('formSubmit').attr('action', goodsReceiptURL);
+        let fromDate = moment([[${invoices.fromDate}]]).format("YYYY-MM-DD");
+        let toDate = moment([[${invoices.toDate}]]).format("YYYY-MM-DD");
+        $('#fromDateForm').val(fromDate);
+        $('#toDateForm').val(toDate);
+        let currentPage = [[${invoices.page}]];
+        let totalPage = [[${invoices.totalPage}]];
+        $(function () {
+            window.pagObj = $('#pagination').twbsPagination({
+                totalPages: totalPage,
+                visiblePages: 5,
+                startPage: currentPage,
+                onPageClick: function (event, page) {
+                    if (page !== currentPage) {
+                        $('#page').val(page - 1);
+                        removeEmptyInputs('formSubmit');
+                        $('#formSubmit').submit();
+                    }
+                }
+            })
+        });
+
+        $(document).ready(function () {
+            let alertContainer = $("#alert-container-success");
+            if (alertContainer.length) {
+                setTimeout(function () {
+                    alertContainer.remove();
+                }, 3000);
+            }
+
+            $('#filterByCategory').on('change', function () {
+                let selectedValue = $(this).val();
+                // $('#categoryCode').val(selectedValue);
+                removeEmptyInputs('form-filter');
+                $('#form-filter').submit();
+            });
+
+            $('#btnDate').click((e) => {
+                e.preventDefault();
+                let fromDate = $('#fromDateForm').val();
+                fromDate = moment(fromDate).format("YYYY-MM-DD HH:mm:ss");
+                let toDate = $('#toDateForm').val();
+                toDate = moment(toDate).format("YYYY-MM-DD HH:mm:ss");
+                $('#fromDateFilter').val(fromDate);
+                $('#toDateFilter').val(toDate);
+                removeEmptyInputs('form-filter');
+                $('#form-filter').submit();
+            });
+
+
+            $('.product-price').each(function () {
+                $(this).text(numeral($(this).text()).format('0,0'))
+            })
+        });
+
+        $('#btnDelete').click(() => {
+            let ids = $('tbody input[type=checkbox]:checked').map(function () {
+                return $(this).val();
+            }).get();
+            deleteCategory(ids);
+        })
+
+        function deleteCategory(ids) {
+            $.ajax({
+                url: '/invoice',
+                type: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                },
+                contentType: 'application/json',
+                data: JSON.stringify(ids),
+                success: function () {
+                    window.location.href = productURL + "?success";
+                },
+                error: function (xhr) {
+                    if (xhr.status === 400) {
+                        let errorMessages = JSON.parse(xhr.responseText);
+                        let error = "";
+                        errorMessages.forEach(function (errorMessage) {
+                            error += errorMessage + "\n";
+                        });
+                        toast({message: error, type: "danger"})
+                    }
+                }
+            })
+        }
+
+        function toast({message = "", type = "error"}) {
+            let alertContainer = $("#alert-container");
+            if (alertContainer.length) {
+                const toast = $("<div></div>");
+                toast.addClass(`alert alert-${type}`);
+                toast.css("animation", "slideInLeft ease 0.3s, fadeOut linear 1s 2s forwards");
+                toast.css("white-space", "pre-wrap");
+                toast.text(message);
+                alertContainer.append(toast);
+
+                setTimeout(function () {
+                    toast.remove();
+                }, 3000);
+            }
+        }
+
+        function removeEmptyInputs(formId) {
+            $('#' + formId + ' input[type="hidden"]').each(function () {
+                if ($(this).val() === '') {
+                    $(this).remove();
+                }
+            });
+        }
+
+
+    </script>
+</div>
+</body>
+</html>

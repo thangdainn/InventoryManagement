@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{index::layout(~{::div})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="right_col" role="main">
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 ">
+
+            <div id="alert-container" style="position: fixed; right: 1px; z-index: 1000"></div>
+
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2 th:text="${invoice.type == 1 ? 'Add Goods Receipt' : 'Add Goods Issue'}"></h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <br/>
+                    <form id="form-submit" th:object="${invoice}" data-parsley-validate
+                          class="form-horizontal form-label-left ">
+                        <div class="item form-group">
+                            <label class="col-form-label col-md-3 col-sm-3 label-align" for="product">Product*
+                            </label>
+                            <div class="col-md-6 col-sm-6">
+                                <select id="product" class="form-control" name="productId"
+                                        th:field="*{productId}">
+                                    <option value="">Select a product</option>
+                                    <option th:each="product : ${products}"
+                                            th:value="${product.id}"
+                                            th:text="${product.name}"
+                                            th:selected="${product.id == invoice.productId}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="item form-group">
+                            <label class="col-form-label col-md-3 col-sm-3 label-align" for="code">Code*
+                            </label>
+                            <div class="col-md-6 col-sm-6 ">
+                                <input th:field="*{code}" type="text" id="code"
+                                       name="code" required="" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="item form-group">
+                            <label class="col-form-label col-md-3 col-sm-3 label-align" for="quantity">Quantity*
+                            </label>
+                            <div class="col-md-6 col-sm-6 ">
+                                <input th:field="*{qty}" type="number" id="quantity"
+                                       name="qty" required="" class="form-control">
+                            </div>
+                        </div>
+                        <div class="item form-group">
+                            <label for="price"
+                                   class="col-form-label col-md-3 col-sm-3 label-align">Price*</label>
+                            <div class="col-md-6 col-sm-6 ">
+                                <input th:field="*{price}" id="price"
+                                       class="form-control" type="number" name="price" required="">
+                            </div>
+                        </div>
+
+                        <div class="ln_solid"></div>
+                        <div class="item form-group">
+                            <div class="col-md-6 col-sm-6 offset-md-3">
+                                <button type="button" onclick="history.back()" class="btn btn-primary">Cancel</button>
+                                <button class="btn btn-success" id="btnAddOrUpdate">
+                                    <span th:text="${invoice.id != null ? 'Update' : 'Add'}"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" th:field="*{id}" id="id" name="id">
+                        <input type="hidden" th:field="*{type}" id="type" name="type">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        let type = [[${invoice.type}]];
+        let url = type == 1 ? '/goods-receipt' : '/goods-issue';
+        console.log(url)
+        let invoiceURL = url + '/list';
+
+        let btn = $("#btnAddOrUpdate");
+
+        $('#btnAddOrUpdate').click((e) => {
+            e.preventDefault();
+            let data = {};
+            let formData = $('#form-submit').serializeArray();
+            $.each(formData, function (i, v) {
+                data[v.name] = v.value;
+            })
+            let id = $('#id').val();
+            if (id === "") {
+                addProduct(data);
+            } else {
+                updateProduct(data, id);
+            }
+        })
+
+        function addProduct(data) {
+            $.ajax({
+                url: '/invoice',
+                type: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                },
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function (result) {
+                    let error = "Add successfully !!!";
+                    toast({message: error, type: "success"})
+                    $('#product').val('');
+                    $("#code").val("");
+                    $("#quantity").val("");
+                    $("#price").val("");
+                },
+                error: function (xhr) {
+                    if (xhr.status === 400) {
+                        let errorMessages = JSON.parse(xhr.responseText);
+                        let error = "";
+                        errorMessages.forEach(function (errorMessage) {
+                            error += errorMessage + "\n";
+                        });
+                        toast({message: error, type: "danger"})
+                    }
+                }
+            })
+        }
+
+        function updateProduct(data, id) {
+            let url = '/invoice/' + id;
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                },
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function (result) {
+                    window.location.href = invoiceURL + '?success';
+                },
+                error: function (xhr) {
+                    if (xhr.status === 400) {
+                        let errorMessages = JSON.parse(xhr.responseText);
+                        let error = "";
+                        errorMessages.forEach(function (errorMessage) {
+                            error += errorMessage + "\n";
+                        });
+                        toast({message: error, type: "danger"})
+                    }
+                }
+            });
+        }
+
+        function toast({message = "", type = "error"}) {
+            let alertContainer = $("#alert-container");
+            if (alertContainer.length) {
+                const toast = $("<div></div>");
+                toast.addClass(`alert alert-${type}`);
+                toast.css("animation", "slideInLeft ease 0.3s, fadeOut linear 1s 2s forwards");
+                toast.css("white-space", "pre-wrap");
+                toast.text(message);
+                alertContainer.append(toast);
+
+                setTimeout(function () {
+                    toast.remove();
+                }, 3000);
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

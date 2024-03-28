@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Login</title>
+    <!-- Bootstrap -->
+    <link th:href="@{/vendors/bootstrap/dist/css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
+    <!-- Font Awesome -->
+    <link th:href="@{/vendors/font-awesome/css/font-awesome.min.css}" rel="stylesheet" type="text/css"/>
+    <!-- NProgress -->
+    <link th:href="@{/vendors/nprogress/nprogress.css}" rel="stylesheet" type="text/css"/>
+    <!-- Animate.css -->
+    <link th:href="@{/vendors/animate.css/animate.min.css}" rel="stylesheet" type="text/css"/>
+
+    <!-- Custom Theme Style -->
+    <link th:href="@{/build/css/custom.min.css}" rel="stylesheet" type="text/css"/>
+
+    <script th:src="@{/vendors/jquery/dist/jquery.min.js}"></script>
+
+</head>
+
+<body class="login">
+
+<div id="alert-container" style="position: fixed; right: 1px; z-index: 1000"></div>
+
+<div>
+    <div class="login_wrapper">
+        <div class="animate form login-form">
+            <section class="login_content">
+                <form th:action="@{/login}" method="post">
+                    <h1>Login Form</h1>
+                    <div th:if="${errorLogin == true}" class="has-error text-danger">
+                        Invalid username or password.
+                    </div>
+                    <div>
+                        <input type="text" class="form-control" name="userName" placeholder="Username" required/>
+
+                    </div>
+                    <div>
+                        <input type="password" class="form-control" name="password" placeholder="Password" required/>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-default submit bg-light">Log in</button>
+                        <a class="reset_pass" href="#">Lost your password?</a>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <div class="separator">
+                        <p class="change_link">New to site?
+                            <a id="btn-to-register" style="cursor: pointer"> Create Account </a>
+                        </p>
+
+                        <div class="clearfix"></div>
+                        <br/>
+                        <div>
+                            <h1><i class="fa fa-paw"></i> ThangDainn!</h1>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <div id="register" class="animate form registration-form" style="display: none">
+            <section class="login_content">
+                <form th:action="@{/register}" method="post"
+                      th:object="${userData}"
+                      id="form-submit">
+                    <h1>Create Account</h1>
+                    <div>
+                        <input name="name" type="text" class="nameUser form-control" placeholder="Name"/>
+                    </div>
+                    <div>
+                        <input name="userName" type="text" class="username form-control" placeholder="Username"/>
+                    </div>
+                    <div>
+                        <input name="password" type="password" class="password form-control" placeholder="Password"/>
+                    </div>
+                    <div>
+                        <input type="password" class="retype-password form-control" placeholder="Retype Password"/>
+                    </div>
+                    <div>
+                        <button id="btnRegister" class="btn btn-default submit bg-light">Register</button>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <div class="separator">
+                        <p class="change_link">Already a member ?
+                            <a id="btn-to-login" style="cursor: pointer"> Log in </a>
+                        </p>
+
+                        <div class="clearfix"></div>
+                        <br/>
+
+                        <div>
+                            <h1><i class="fa fa-paw"></i> ThangDainn!</h1>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+<script>
+    function registerPage() {
+        $(".login-form").css("display", "none")
+        $(".registration-form").css("display", "block")
+    }
+
+    function loginPage() {
+        $(".registration-form").css("display", "none")
+        $(".login-form").css("display", "block")
+    }
+
+    $(document).ready(function () {
+        $("#btn-to-register").click(registerPage)
+        $("#btn-to-login").click(loginPage)
+    });
+
+    $('#btnRegister').click((e) => {
+        e.preventDefault();
+        let repass = $(".retype-password").val();
+        if (repass === '' || repass !== $(".password").val()){
+            let error = "Retype password is incorrect";
+            toast({message: error, type: "danger"})
+        } else {
+            let data = {};
+            let formData = $('#form-submit').serializeArray();
+            $.each(formData, function (i, v) {
+                data[v.name] = v.value;
+            })
+            data['roleIds'] = [5];
+            addUser(data);
+        }
+
+    })
+    // $('#btnLogin').click((e) => {
+    //     e.preventDefault();
+    //     let username = $(".username-login").val();
+    //     let password = $(".password-login").val();
+    //     if (username === '' || password === ''){
+    //         let error = "Invalid username or password";
+    //         toast({message: error, type: "danger"})
+    //     } else {
+    //         let data = {};
+    //         let formData = $('#form-login').serializeArray();
+    //         $.each(formData, function (i, v) {
+    //             data[v.name] = v.value;
+    //         })
+    //         login(data);
+    //     }
+    // })
+
+    function addUser(data) {
+        $.ajax({
+            url: '/register',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            success: function () {
+                let error = "Register successfully !!!";
+                toast({message: error, type: "success"})
+                $(".nameUser").val("");
+                $(".username").val("");
+                $(".password").val("");
+                $(".retype-password").val("");
+                loginPage();
+            },
+            error: function (xhr) {
+                if (xhr.status === 400) {
+                    let errorMessages = JSON.parse(xhr.responseText);
+                    let error = "";
+                    errorMessages.forEach(function (errorMessage) {
+                        error += errorMessage + "\n";
+                    });
+                    toast({message: error, type: "danger"})
+                }
+            }
+        })
+    }
+
+    // function login(data) {
+    //     $.ajax({
+    //         url: '/login',
+    //         type: 'POST',
+    //         contentType: 'application/json',
+    //         data: JSON.stringify(data),
+    //         dataType: 'json',
+    //         success: function (message) {
+    //             let jwt = JSON.parse(message.responseText);
+    //             localStorage.setItem('jwtToken', jwt);
+    //         },
+    //         error: function (xhr) {
+    //             if (xhr.status === 400) {
+    //                 let errorMessages = JSON.parse(xhr.responseText);
+    //                 let error = "";
+    //                 errorMessages.forEach(function (errorMessage) {
+    //                     error += errorMessage + "\n";
+    //                 });
+    //                 toast({message: error, type: "danger"})
+    //             }
+    //         }
+    //     })
+    // }
+
+    function toast({message = "", type = "error"}) {
+        let alertContainer = $("#alert-container");
+        if (alertContainer.length) {
+            const toast = $("<div></div>");
+            toast.addClass(`alert alert-${type}`);
+            toast.css("animation", "slideInLeft ease 0.3s, fadeOut linear 1s 2s forwards");
+            toast.css("white-space", "pre-wrap");
+            toast.text(message);
+            alertContainer.append(toast);
+
+            setTimeout(function () {
+                toast.remove();
+            }, 3000);
+        }
+    }
+</script>
+
+</body>
+</html>

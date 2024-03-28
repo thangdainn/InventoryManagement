@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!--    th:replace="top-nav::layout(~{::div})">-->
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="top_nav" th:fragment="top-nav">
+<!--    <div class="top_nav">-->
+        <div class="nav_menu">
+            <div class="nav toggle">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+            </div>
+            <nav class="nav navbar-nav">
+                <ul class=" navbar-right">
+                    <li class="nav-item dropdown open" style="padding-left: 15px;">
+                        <a href="javascript:;" class="user-profile dropdown-toggle" aria-haspopup="true"
+                           id="navbarDropdown" data-toggle="dropdown" aria-expanded="false">
+                            <img th:src="@{/images/img.jpg}" alt="" th:utext="${user.name}">
+                        </a>
+                        <div class="dropdown-menu dropdown-usermenu pull-right" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="javascript:;"> Profile</a>
+                            <a class="dropdown-item" href="javascript:;">
+                                <span>Settings</span>
+                            </a>
+                            <form name="logoutForm" th:action="@{/logout}" method="post">
+                                <input id="btnLogout" class="dropdown-item" type="submit" value="Log Out">
+                            </form>
+                        </div>
+                    </li>
+
+                </ul>
+            </nav>
+        </div>
+        <script>
+            $('#btnLogout').click((e) => {
+                // e.preventDefault()
+                localStorage.removeItem('token')
+                e.submit();
+            })
+        </script>
+    </div>
+
+</body>
+</html>

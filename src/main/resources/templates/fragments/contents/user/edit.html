@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{index::layout(~{::div})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="right_col" role="main">
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 ">
+
+            <div id="alert-container" style="position: fixed; right: 1px; z-index: 1000"></div>
+
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>User</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <br/>
+                    <form id="form-submit" th:object="${userData}" data-parsley-validate
+                          class="form-horizontal form-label-left">
+
+                        <div class="item form-group">
+                            <label class="col-form-label col-md-3 col-sm-3 label-align" for="name">Name*
+                            </label>
+                            <div class="col-md-6 col-sm-6 ">
+                                <input th:field="*{name}" type="text" id="name"
+                                       name="name" required="" class="form-control">
+                            </div>
+                        </div>
+                        <div class="item form-group">
+                            <label class="col-form-label col-md-3 col-sm-3 label-align" for="userName">Username*
+                            </label>
+                            <div class="col-md-6 col-sm-6 ">
+                                <input th:field="*{userName}" type="text" id="userName"
+                                       name="userName" required="" class="form-control">
+                            </div>
+                        </div>
+                        <div class="item form-group">
+                            <label for="password"
+                                   class="col-form-label col-md-3 col-sm-3 label-align">Password*</label>
+                            <div class="col-md-6 col-sm-6 ">
+                                <input th:field="*{password}"
+                                       id="password" class="form-control" type="password" name="password" required="">
+                            </div>
+                        </div>
+
+                        <div class="item form-group align-items-center">
+                            <label for="password"
+                                   class="col-form-label col-md-3 col-sm-3 label-align">Role*</label>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="checkbox mb-1" th:each="role : ${roles}">
+                                    <label class="m-0">
+                                        <input type="checkbox" class="flat"
+                                               th:text="${role.name}"
+                                               th:value="${role.id}"
+                                               th:checked="${userData.roles.contains(role)}">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ln_solid"></div>
+                        <div class="item form-group">
+                            <div class="col-md-6 col-sm-6 offset-md-3">
+                                <button type="button" onclick="history.back()" class="btn btn-primary">Cancel</button>
+                                <button class="btn btn-success" id="btnAddOrUpdate">
+                                    <span th:text="${userData.id != null ? 'Update' : 'Add'}"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" th:field="*{id}" id="id" name="id">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userURL = '/user/list';
+        $('#btnAddOrUpdate').click((e) => {
+            e.preventDefault();
+            let data = {};
+            let formData = $('#form-submit').serializeArray();
+            $.each(formData, function (i, v) {
+                data[v.name] = v.value;
+            })
+
+            // Lấy giá trị từ checkbox
+            let roleIds = [];
+            $('input[type=checkbox]:checked').each(function (){
+                roleIds.push($(this).val());
+            })
+            // Thêm giá trị vào data
+            data['roleIds'] = roleIds;
+
+            let id = $('#id').val();
+            if (id === "") {
+                addUser(data);
+            } else {
+                updateUser(data, id);
+            }
+        })
+
+        function addUser(data) {
+            $.ajax({
+                url: '/user',
+                type: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                },
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function () {
+                    let error = "Add successfully !!!";
+                    toast({message: error, type: "success"})
+                    $("#name").val("");
+                    $("#userName").val("");
+                    $("#password").val("");
+                },
+                error: function (xhr) {
+                    if (xhr.status === 400) {
+                        let errorMessages = JSON.parse(xhr.responseText);
+                        let error = "";
+                        errorMessages.forEach(function (errorMessage) {
+                            error += errorMessage + "\n";
+                        });
+                        toast({message: error, type: "danger"})
+                    }
+                }
+            })
+        }
+
+        function updateUser(data, id) {
+            let url = '/user/' + id;
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                },
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function (result) {
+                    window.location.href = userURL + '?success';
+                },
+                error: function (xhr) {
+                    if (xhr.status === 400) {
+                        let errorMessages = JSON.parse(xhr.responseText);
+                        let error = "";
+                        errorMessages.forEach(function (errorMessage) {
+                            error += errorMessage + "\n";
+                        });
+                        toast({message: error, type: "danger"})
+                    }
+                }
+            });
+        }
+
+        function toast({message = "", type = "error"}) {
+            let alertContainer = $("#alert-container");
+            if (alertContainer.length) {
+                const toast = $("<div></div>");
+                toast.addClass(`alert alert-${type}`);
+                toast.css("animation", "slideInLeft ease 0.3s, fadeOut linear 1s 2s forwards");
+                toast.css("white-space", "pre-wrap");
+                toast.text(message);
+                alertContainer.append(toast);
+
+                setTimeout(function () {
+                    toast.remove();
+                }, 3000);
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

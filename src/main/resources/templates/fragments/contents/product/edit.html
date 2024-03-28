@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{index::layout(~{::div})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="right_col" role="main">
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 ">
+
+            <div id="alert-container" style="position: fixed; right: 1px; z-index: 1000"></div>
+
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Product</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <br/>
+                    <form id="form-submit" th:object="${product}" data-parsley-validate
+                          class="form-horizontal form-label-left "
+                          enctype="multipart/form-data">
+                        <div class="d-flex">
+                            <div class="w-75">
+
+                                <div class="item form-group">
+                                    <label class="col-form-label col-md-3 col-sm-3 label-align" for="name">Category*
+                                    </label>
+                                    <div class="col-md-6 col-sm-6">
+                                        <select id="category" class="form-control" name="category"
+                                                th:field="*{categoryId}">
+                                            <option value="">Select a category</option>
+                                            <option th:each="cate : ${categories}"
+                                                    th:value="${cate.id}"
+                                                    th:text="${cate.name}"
+                                                    th:selected="${cate.id == product.categoryId}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="item form-group">
+                                    <label class="col-form-label col-md-3 col-sm-3 label-align" for="code">Code*
+                                    </label>
+                                    <div class="col-md-6 col-sm-6 ">
+                                        <input th:field="*{code}" type="text" id="code"
+                                               name="code" required="" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="item form-group">
+                                    <label class="col-form-label col-md-3 col-sm-3 label-align" for="name">Name*
+                                    </label>
+                                    <div class="col-md-6 col-sm-6 ">
+                                        <input th:field="*{name}" type="text" id="name"
+                                               name="name" required="" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="item form-group">
+                                    <label for="description"
+                                           class="col-form-label col-md-3 col-sm-3 label-align">Description</label>
+                                    <div class="col-md-6 col-sm-6 ">
+                                        <input th:field="*{description}"
+                                               id="description" class="form-control" type="text" name="description"
+                                               required="">
+                                    </div>
+                                </div>
+                                <div class="item form-group">
+                                    <label for="multipartFile"
+                                           class="col-form-label col-md-3 col-sm-3 label-align">Image Upload</label>
+                                    <div class="col-md-6 col-sm-6 ">
+                                        <input accept=".jpg, .png" enctype="multipart/form-data"
+                                               id="multipartFile" class="form-control" type="file" name="multipartFile"
+                                               required=""
+                                               onchange="displayFilePath(this)">
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="d-flex align-items-center" style="margin-left: -10%">
+                                <img th:if="${product.imgUrl != null}" th:src="@{${product.imgUrl}}" id="img" alt="..."
+                                     class="img-container profile_img" width="200px" height="200px">
+                                <img th:unless="${product.imgUrl != null}" th:src="@{/upload/icons8_image.png}" id="img" alt="..."
+                                     class="img-container profile_img" width="200px" height="200px">
+                            </div>
+                        </div>
+                        <div class="ln_solid"></div>
+                        <div class="item form-group">
+                            <div class="col-md-6 col-sm-6 offset-md-3">
+                                <button type="button" onclick="history.back()" class="btn btn-primary">Cancel</button>
+                                <button class="btn btn-success" id="btnAddOrUpdate" disabled>
+                                    <span th:text="${product.id != null ? 'Update' : 'Add'}"></span>
+                                </button>
+                            </div>
+                        </div>
+<!--                        <input type="hidden" th:value="${product.id != null ? product.id : ''}" id="id" name="id">-->
+                        <input type="hidden" th:field="*{id}" id="id" name="id">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let productURL = '/product/list';
+
+        let btn = $("#btnAddOrUpdate");
+        function displayFilePath(input) {
+            if (input.files.length > 0) {
+                const reader = new FileReader();
+                // Đọc dữ liệu từ tệp hình ảnh
+                reader.onload = function (e) {
+                    $("#img").attr('src', e.target.result);
+                };
+                // Đọc tệp hình ảnh
+                reader.readAsDataURL(input.files[0]);
+                btn.prop("disabled", false);
+            } else {
+                changeBtnSubmit();
+            }
+        }
+
+        function changeBtnSubmit(){
+            let id = $('#id').val();
+            if (id === "") {
+                btn.prop("disabled", true);
+            } else {
+                btn.prop("disabled", false);
+            }
+        }
+        changeBtnSubmit();
+
+
+        $('#btnAddOrUpdate').click((e) => {
+            e.preventDefault();
+
+            let productData = {};
+            let data = $('#form-submit').serializeArray();
+            $.each(data, function (i, v) {
+                productData[v.name] = v.value;
+            })
+
+            let formData = new FormData();
+            formData.append("multipartFile", $("#multipartFile")[0].files[0]);
+            formData.append("product", JSON.stringify(productData));
+            let id = $('#id').val();
+            if (id === "") {
+                addProduct(formData);
+            } else {
+                updateProduct(formData, id);
+            }
+        })
+
+        function addProduct(data) {
+            $.ajax({
+                url: '/product',
+                type: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                },
+                data: data,
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    let error = "Add successfully !!!";
+                    toast({message: error, type: "success"})
+                    $('#category').val('');
+                    $("#name").val("");
+                    $("#code").val("");
+                    $("#description").val("");
+                    $('#multipartFile').val('');
+                    btn.prop("disabled", true);
+                    $("#img").attr('src', "/upload/icons8_image.png");
+                },
+                error: function (xhr) {
+                    if (xhr.status === 400) {
+                        let errorMessages = [];
+                        const response = JSON.parse(xhr.responseText);
+                        if (response && response.errors && Array.isArray(response.errors)) {
+                            response.errors.forEach(function (error) {
+                                errorMessages.push(error.defaultMessage);
+                            });
+                        }
+                        let error = errorMessages.join('\n');
+                        console.log(error);
+                        toast({ message: error, type: "danger" });
+                    }
+                }
+            })
+        }
+
+        function updateProduct(data, id) {
+            let url = '/product/' + id;
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                },
+                data: data,
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    window.location.href = productURL + '?success';
+                },
+                error: function (xhr) {
+                    if (xhr.status === 400) {
+                        let errorMessages = [];
+                        const response = JSON.parse(xhr.responseText);
+                        if (response && response.errors && Array.isArray(response.errors)) {
+                            response.errors.forEach(function (error) {
+                                errorMessages.push(error.defaultMessage);
+                            });
+                        }
+                        let error = errorMessages.join('\n');
+                        console.log(error);
+                        toast({ message: error, type: "danger" });
+                    }
+                }
+            });
+        }
+
+        function toast({message = "", type = "error"}) {
+            let alertContainer = $("#alert-container");
+            if (alertContainer.length) {
+                const toast = $("<div></div>");
+                toast.addClass(`alert alert-${type}`);
+                toast.css("animation", "slideInLeft ease 0.3s, fadeOut linear 1s 2s forwards");
+                toast.css("white-space", "pre-wrap");
+                toast.text(message);
+                alertContainer.append(toast);
+
+                setTimeout(function () {
+                    toast.remove();
+                }, 3000);
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

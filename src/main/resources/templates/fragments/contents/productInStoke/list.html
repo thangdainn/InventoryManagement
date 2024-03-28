@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{index::layout(~{::div})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Category List</title>
+</head>
+<body>
+<div class="right_col" role="main">
+    <div class="">
+        <div class="row" style="display: block;">
+            <div class="clearfix"></div>
+            <div class="col-md-12 col-sm-12 float-none">
+
+                <div class="x_panel">
+
+                    <!--                    Form filter-->
+                    <div th:object="${productInStokes}">
+                        <div class="x_title row">
+                            <h2 class="col-md-2">Product In Stoke List</h2>
+                            <form th:action="@{/product-in-stoke}" id="form-submit" data-parsley-validate
+                                  class="col-md-8 form-horizontal form-label-left"
+                                  method="get">
+                                <div class="col-md-5 col-sm-5  form-group pull-right top_search">
+                                    <div class="input-group">
+                                        <input id="search" th:field="*{keyword}" type="text"
+                                               name="keyword" class="form-control" placeholder="Enter Name...">
+                                        <span class="input-group-btn">
+										<button class="btn btn-secondary" type="submit">Search</button>
+									</span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="x_title row justify-content-md-end">
+                            <form th:action="@{/product-in-stoke}" id="form-filter"
+                                  data-parsley-validate
+                                  class="col-md-1 form-horizontal form-label-left"
+                                  method="get">
+                                <div class=" form-group">
+                                    <label class="row col-form-label label-align" for="form-filter">Category
+                                    </label>
+                                    <select id="filterByCategory" th:field="*{categoryCode}" class="row"
+                                            name="categoryId" style="color: #73879C;">
+                                        <option value="">All</option>
+                                        <option th:each="cate : ${categories}"
+                                                th:value="${cate.code}"
+                                                th:text="${cate.name}"
+                                                th:selected="${cate.code == categoryCode}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <input type="hidden" th:field="*{keyword}" id="keywordFilter" name="keyword">
+                            </form>
+                        </div>
+
+                        <form action="" id="formSubmit" method="get">
+                            <input type="hidden" th:field="*{page}" id="page" name="page">
+                            <input type="hidden" th:field="*{keyword}" id="keyword" name="keyword">
+                            <input type="hidden" th:field="*{categoryCode}" id="categoryCode" name="categoryCode">
+                        </form>
+                    </div>
+
+                    <!--Content-->
+                    <div class="x_content">
+                        <div th:if="${#lists.size(productInStokes.listResult) == 0}">
+                            <h2>No Items</h2>
+                        </div>
+                        <div th:unless="${#lists.size(productInStokes.listResult) == 0}"
+                             class="table-responsive overflow-hidden">
+                            <div style="min-height: 50vh">
+                                <table class="table table-striped jambo_table bulk_action">
+                                    <thead>
+                                    <tr class="headings">
+                                        <th class="column-title">Category</th>
+                                        <th class="column-title">Code</th>
+                                        <th class="column-title">Name</th>
+                                        <th class="column-title">Quantity</th>
+                                        <th class="column-title">Price</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    <tr class="even pointer" th:each="productInStoke : ${productInStokes.listResult}">
+                                        <td class=" " th:text="${productInStoke.productInfo.category.name}"></td>
+                                        <td class=" " th:text="${productInStoke.productInfo.code}"></td>
+                                        <td class=" " th:text="${productInStoke.productInfo.name}"></td>
+                                        <td class=" " th:text="${productInStoke.qty}"></td>
+                                        <td class="product-price " th:text="${productInStoke.price}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <ul class="pagination justify-content-center" id="pagination"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        let productURL = '/product-in-stoke';
+        $('formSubmit').attr('action', productURL);
+        let currentPage = [[${productInStokes.page}]];
+        let totalPage = [[${productInStokes.totalPage}]];
+        $(function () {
+            window.pagObj = $('#pagination').twbsPagination({
+                totalPages: totalPage,
+                visiblePages: 5,
+                startPage: currentPage,
+                onPageClick: function (event, page) {
+                    if (page !== currentPage) {
+                        $('#page').val(page - 1);
+                        removeEmptyInputs('formSubmit');
+                        $('#formSubmit').submit();
+                    }
+                }
+            })
+        });
+
+        $(document).ready(function () {
+            $('#filterByCategory').on('change', function () {
+                // let selectedValue = $(this).val();
+                // $('#categoryCode').val(selectedValue);
+                // let keyword = [[${productInStokes.keyword}]];
+                // $('#keywordFilter').val(keyword);
+                removeEmptyInputs('form-filter');
+                $('#form-filter').submit();
+            });
+
+            $('.product-price').each(function () {
+                $(this).text(numeral($(this).text()).format('0,0'))
+            })
+        });
+
+        function removeEmptyInputs(formId) {
+            $('#' + formId + ' input[type="hidden"]').each(function () {
+                if ($(this).val() === '') {
+                    $(this).remove();
+                }
+            });
+        }
+    </script>
+</div>
+</body>
+</html>

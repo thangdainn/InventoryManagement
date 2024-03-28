@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{index::layout(~{::div})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Role List</title>
+</head>
+<body>
+<div class="right_col" role="main">
+    <div class="">
+        <div class="row" style="display: block;">
+            <div class="clearfix"></div>
+            <div class="col-md-12 col-sm-12 float-none">
+
+                <!--                alert message-->
+                <div id="alert-container-success" style="position: fixed; right: 1px; z-index: 1000">
+                    <div class="alert alert-success" th:if="${param.success}">Successfully!!!</div>
+                </div>
+                <div id="alert-container" style="position: fixed; right: 1px; z-index: 1000">
+                </div>
+
+                <div class="x_panel">
+                    <div class="x_title row" th:object="${menupage}">
+                        <h2 class="col-md-2">Menu List</h2>
+                        <div class="col-md-8"></div>
+                        <div class="col-md-2">
+                            <a href="/menu/permission" style="color: white"
+                               class="btn btn-round btn-primary">Permission</a>
+
+                        </div>
+                        <form action="" id="formSubmit" method="get">
+                            <input type="hidden" th:field="*{page}" id="page" name="page">
+                        </form>
+                    </div>
+                    <!--                    <div class="clearfix"></div>-->
+
+                    <div class="x_content">
+
+                        <!--                        <p>Add class <code>bulk_action</code> to table for bulk actions options on row select</p>-->
+
+                        <div th:if="${#lists.size(menupage.listResult) == 0}">
+                            <h2>No Items</h2>
+                        </div>
+                        <div th:unless="${#lists.size(menupage.listResult) == 0}"
+                             class="table-responsive overflow-hidden">
+                            <div style="min-height: 67vh">
+                                <table class="table table-striped jambo_table bulk_action">
+                                    <thead>
+                                    <tr class="headings">
+                                        <th rowspan="2" class="column-title align-middle"
+                                            style="border-left: 2px solid">No
+                                        </th>
+                                        <th rowspan="2" class="column-title align-middle"
+                                            style="border-left: 2px solid">Url
+                                        </th>
+                                        <th rowspan="2" class="column-title align-middle"
+                                            style="border-left: 2px solid">Status
+                                        </th>
+                                        <th class="column-title text-center" style="border-left: 2px solid"
+                                            th:colspan="${roles.size()}">
+                                            Role
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="column-title" style="border-left: 2px solid"
+                                            th:each="role : ${roles}" th:text="${role.name}"></th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    <tr class="even pointer" th:each="menu, stat : ${menupage.listResult}">
+                                        <td class=" "
+                                            th:text="${(menupage.page - 1) * menupage.size + stat.index + 1}"></td>
+                                        <td class=" " th:text="${menu.url}"></td>
+                                        <td class=" ">
+                                            <div class="row">
+                                                <div class="col-md-6" th:text="${menu.activeFlag == 1 ? 'Enable ' : 'Disable '}"></div>
+<!--                                                <a th:href="@{'/menu/change-permission/' + ${menu.id}}"-->
+<!--                                                   th:class="${menu.activeFlag == 1 ? 'col-md-3 btn btn-round btn-danger' : 'col-md-3 btn btn-round btn-primary'}"-->
+<!--                                                   th:text="${menu.activeFlag == 1 ? 'Disable' : 'Enable'}">-->
+<!--                                                </a>-->
+                                                <form th:action="@{'/menu/change-permission/' + ${menu.id}}" class="col-md-3" method="post">
+                                                    <button type="submit"
+                                                            th:class="${menu.activeFlag == 1 ? 'btn btn-round btn-danger' : 'btn btn-round btn-primary'}"
+                                                            th:text="${menu.activeFlag == 1 ? 'Disable' : 'Enable'}"></button>
+                                                </form>
+                                            </div>
+                                        </td>
+
+                                        <td th:each="auth : ${menu.mapAuth}">
+                                            <i th:class="${auth.value == 1 ? 'fa fa-check text-success' : 'fa fa-times text-danger'}"></i>
+                                        </td>
+
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <ul class="pagination justify-content-center" id="pagination"></ul>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        let roleURL = '/menu/list';
+        $('formSubmit').attr('action', roleURL);
+        let currentPage = [[${menupage.page}]];
+        let totalPage = [[${menupage.totalPage}]];
+        $(function () {
+            window.pagObj = $('#pagination').twbsPagination({
+                totalPages: totalPage,
+                visiblePages: 5,
+                startPage: currentPage,
+                onPageClick: function (event, page) {
+                    if (page !== currentPage) {
+                        $('#page').val(page - 1);
+                        removeEmptyInputs('formSubmit');
+                        $('#formSubmit').submit();
+                    }
+                }
+            })
+        });
+        $(document).ready(function () {
+            let alertContainer = $("#alert-container-success");
+            if (alertContainer.length) {
+                setTimeout(function () {
+                    alertContainer.remove();
+                }, 3000);
+            }
+        });
+        $('#btnDelete').click(() => {
+            let ids = $('tbody input[type=checkbox]:checked').map(function () {
+                return $(this).val();
+            }).get();
+            deleteCategory(ids);
+        })
+
+        function deleteCategory(ids) {
+            $.ajax({
+                url: '/role',
+                type: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                },
+                contentType: 'application/json',
+                data: JSON.stringify(ids),
+                success: function (result) {
+                    window.location.href = roleURL + "?success";
+                },
+                error: function (xhr) {
+                    if (xhr.status === 400) {
+                        let errorMessages = JSON.parse(xhr.responseText);
+                        let error = "";
+                        errorMessages.forEach(function (errorMessage) {
+                            error += errorMessage + "\n";
+                        });
+                        toast({message: error, type: "danger"})
+                    }
+                }
+            })
+        }
+
+        function toast({message = "", type = "error"}) {
+            let alertContainer = $("#alert-container");
+            if (alertContainer.length) {
+                const toast = $("<div></div>");
+                toast.addClass(`alert alert-${type}`);
+                toast.css("animation", "slideInLeft ease 0.3s, fadeOut linear 1s 2s forwards");
+                toast.css("white-space", "pre-wrap");
+                toast.text(message);
+                alertContainer.append(toast);
+
+                setTimeout(function () {
+                    toast.remove();
+                }, 3000);
+            }
+        }
+
+        function removeEmptyInputs(formId) {
+            $('#' + formId + ' input[type="hidden"]').each(function () {
+                if ($(this).val() === '') {
+                    $(this).remove();
+                }
+            });
+        }
+    </script>
+</div>
+</body>
+</html>
