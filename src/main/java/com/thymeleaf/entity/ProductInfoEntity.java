@@ -50,4 +50,5 @@ public class ProductInfoEntity extends BaseEntity{
 
     @OneToMany(mappedBy = "product")
     private List<InvoiceEntity> invoices = new ArrayList<>();
+
 }

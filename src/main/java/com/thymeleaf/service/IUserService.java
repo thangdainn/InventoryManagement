@@ -1,6 +1,7 @@
 package com.thymeleaf.service;
 
 import com.thymeleaf.dto.UserDTO;
+import com.thymeleaf.security.CustomUserDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,4 +13,6 @@ public interface IUserService {
     Page<UserDTO> findAll(Pageable pageable);
     Page<UserDTO> findByNameContaining(String keyword, Pageable pageable);
     void delete(Integer[] ids);
+
+    CustomUserDetail loadUserByRefreshToken(String refreshToken);
 }

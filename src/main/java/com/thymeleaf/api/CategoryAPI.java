@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/category")
-//@ComponentScan(basePackages = {"com.thymeleaf.api"})
 public class CategoryAPI {
 
     @Autowired
@@ -50,11 +49,6 @@ public class CategoryAPI {
         return ResponseEntity.ok(model);
     }
 
-//    @PostMapping
-////    @PreAuthorize("permitAll()")
-//    public CategoryDTO createCategory(@RequestBody CategoryDTO model){
-//        return categoryService.save(model);
-//    }
 
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasRole('ADMIN')")

@@ -1,15 +1,11 @@
 package com.thymeleaf.security;
 
-import com.thymeleaf.dto.AuthDTO;
-import com.thymeleaf.dto.MenuDTO;
-import com.thymeleaf.dto.RoleDTO;
+import com.thymeleaf.dto.*;
 import com.thymeleaf.jwt.JwtTokenProvider;
 import com.thymeleaf.payload.response.JwtResponse;
 import com.thymeleaf.repository.IAuthRepository;
 import com.thymeleaf.repository.IRoleRepository;
-import com.thymeleaf.service.IAuthService;
-import com.thymeleaf.service.IMenuService;
-import com.thymeleaf.service.IRoleService;
+import com.thymeleaf.service.*;
 import com.thymeleaf.utils.Constant;
 import com.thymeleaf.utils.SecurityUtil;
 import jakarta.servlet.ServletException;
@@ -49,6 +45,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+
+    @Autowired
+    private ITokenService tokenService;
+
+    @Autowired
+    private IUserService userService;
+
 //    @Autowired
 //    private IAuthRepository authRepository;
 
@@ -73,9 +76,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         RoleDTO role = new RoleDTO();
         if (isAdmin(roles)) {
             role.setName("ROLE_ADMIN");
-        } else if (isStaff(roles)){
+        } else if (isStaff(roles)) {
             role.setName("ROLE_STAFF");
-        } else if (isEmployee(roles)){
+        } else if (isEmployee(roles)) {
             role.setName("ROLE_EMPLOYEE");
         }
         role = roleService.findByName(role);
@@ -110,11 +113,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         }
         url = "/home";
         CustomUserDetail customUserDetail = (CustomUserDetail) authentication.getPrincipal();
-        String jwt = tokenProvider.generateToken(customUserDetail);
-        System.out.println(jwt);
+        UserDTO userDTO = userService.findByUserName(customUserDetail.getUsername(), 1);
+        TokenDTO tokenDTO = tokenProvider.generateToken(customUserDetail);
+        tokenDTO.setUserId(userDTO.getId());
+        tokenService.save(tokenDTO);
         List<String> listRole = customUserDetail.getAuthorities().stream()
                 .map(item -> item.getAuthority()).collect(Collectors.toList());
-        JwtResponse jwtResponse = new JwtResponse(jwt, customUserDetail.getUsername(), customUserDetail.getName(), listRole);
+        JwtResponse jwtResponse = new JwtResponse(tokenDTO.getToken(), tokenDTO.getRefreshToken(), customUserDetail.getUsername(), customUserDetail.getName(), listRole);
         HttpSession session = request.getSession();
         session.setAttribute(Constant.JWT, jwtResponse);
         session.setAttribute(Constant.MENUS, menuList);

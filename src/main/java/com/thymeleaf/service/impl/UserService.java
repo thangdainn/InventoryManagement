@@ -3,9 +3,12 @@ package com.thymeleaf.service.impl;
 import com.thymeleaf.converter.UserConverter;
 import com.thymeleaf.dto.UserDTO;
 import com.thymeleaf.entity.RoleEntity;
+import com.thymeleaf.entity.TokenEntity;
 import com.thymeleaf.entity.UserEntity;
 import com.thymeleaf.repository.IRoleRepository;
+import com.thymeleaf.repository.ITokenRepository;
 import com.thymeleaf.repository.IUserRepository;
+import com.thymeleaf.security.CustomUserDetail;
 import com.thymeleaf.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,6 +35,9 @@ public class UserService implements IUserService {
 
     @Autowired
     private IRoleRepository roleRepository;
+
+    @Autowired
+    private ITokenRepository tokenRepository;
 
     @Override
     public UserDTO findByUserNameAndPassword(UserDTO dto) {
@@ -106,5 +112,16 @@ public class UserService implements IUserService {
     @Override
     public void delete(Integer[] ids) {
         userRepository.deleteAllByIdInBatch(Arrays.asList(ids));
+    }
+
+    @Override
+    public CustomUserDetail loadUserByRefreshToken(String refreshToken) {
+        Optional<TokenEntity> optional = tokenRepository.findByRefreshToken(refreshToken);
+        if (optional.isPresent()){
+            TokenEntity tokenEntity = optional.get();
+            UserEntity userEntity = tokenEntity.getUser();
+            return new CustomUserDetail(userEntity);
+        }
+        return null;
     }
 }

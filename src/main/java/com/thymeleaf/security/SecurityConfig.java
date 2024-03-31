@@ -3,6 +3,7 @@ package com.thymeleaf.security;
 import com.thymeleaf.jwt.JwtAuthenticationFilter;
 import com.thymeleaf.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
 @EnableWebSecurity
@@ -30,9 +32,13 @@ public class SecurityConfig {
     @Autowired
     private CustomSuccessHandler customSuccessHandler;
 
+    @Autowired
+    @Qualifier("handlerExceptionResolver")
+    private HandlerExceptionResolver exceptionResolver;
+
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(){
-        return new JwtAuthenticationFilter();
+        return new JwtAuthenticationFilter(exceptionResolver);
     }
 
     @Bean
@@ -50,27 +56,25 @@ public class SecurityConfig {
 //                        .hasAuthority("ADMIN")
 //                        .requestMatchers("/user/**", "/goods-receipt/**", "/goods-issue/**")
 //                        .hasAnyAuthority("ADMIN", "STAFF")
-                        .requestMatchers("/register", "/vendors/**", "/build/**", "/css/**", "/images/**", "/js/**")
+                        .requestMatchers("/register", "/vendors/**", "/build/**", "/css/**", "/images/**", "/js/**", "/refreshToken", "/signin")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
-//                .csrf(csrf -> csrf
-//                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-                .formLogin((form) -> form
-                        .loginPage("/login")
-                        .usernameParameter("userName")
-                        .passwordParameter("password")
-                        .permitAll()
-                        .successHandler(customSuccessHandler)
-                        .failureUrl("/loginFail")
-//                        .failureForwardUrl("/loginFail")
-//                        .loginProcessingUrl("/login")
-                )
+//                .formLogin((form) -> form
+//                        .loginPage("/login")
+//                        .usernameParameter("userName")
+//                        .passwordParameter("password")
+//                        .permitAll()
+//                        .successHandler(customSuccessHandler)
+//                        .failureUrl("/loginFail")
+////                        .failureForwardUrl("/loginFail")
+////                        .loginProcessingUrl("/login")
+//                )
                 .logout((logout) -> logout
                         .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true))
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-//        http.authenticationProvider(authenticationProvider());
+        http.authenticationProvider(authenticationProvider());
 //        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

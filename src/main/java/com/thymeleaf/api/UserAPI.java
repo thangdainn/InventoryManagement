@@ -1,10 +1,12 @@
 package com.thymeleaf.api;
 
+import com.thymeleaf.dto.TokenDTO;
 import com.thymeleaf.dto.UserDTO;
 import com.thymeleaf.jwt.JwtTokenProvider;
 import com.thymeleaf.payload.request.LoginRequest;
 import com.thymeleaf.payload.response.JwtResponse;
 import com.thymeleaf.security.CustomUserDetail;
+import com.thymeleaf.service.ITokenService;
 import com.thymeleaf.service.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,9 @@ public class UserAPI {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired
+    private ITokenService tokenService;
+
     @PostMapping(value = "/signin")
     public ResponseEntity<?> login(@RequestBody LoginRequest user) {
         Authentication authentication = authenticationManager.authenticate(
@@ -43,10 +48,13 @@ public class UserAPI {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         CustomUserDetail customUserDetail = (CustomUserDetail) authentication.getPrincipal();
-        String jwt = tokenProvider.generateToken(customUserDetail);
+        TokenDTO tokenDTO = tokenProvider.generateToken(customUserDetail);
+        UserDTO userDTO = userService.findByUserName(user.getUserName(), 1);
+        tokenDTO.setUserId(userDTO.getId());
+        tokenService.save(tokenDTO);
         List<String> listRole = customUserDetail.getAuthorities().stream()
                 .map(role -> role.getAuthority()).collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(jwt, customUserDetail.getUsername(), customUserDetail.getName(), listRole));
+        return ResponseEntity.ok(new JwtResponse(tokenDTO.getToken(), tokenDTO.getRefreshToken(), customUserDetail.getUsername(), customUserDetail.getName(), listRole));
     }
 
     @PostMapping(value = {"/user", "/register"})

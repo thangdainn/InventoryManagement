@@ -48,6 +48,28 @@
     </div>
     <script th:inline="javascript">
         localStorage.setItem('token', [[${JWT.token}]]);
+        let token = localStorage.getItem('token');
+        let expirationDate = getExpirationDate(token);
+        console.log(expirationDate > new Date());
+        function getExpirationDate(jwtToken) {
+            let payload;
+            // Split the token into parts
+            let parts = jwtToken.split('.');
+            if (parts.length === 3) {
+                // The token has the correct number of parts, so we will try to parse it
+                payload = parts[1];
+                // Base64 decode the payload
+                let decodedPayload = atob(payload);
+                // Parse the JSON
+                let jsonPayload = JSON.parse(decodedPayload);
+                // Get the expiration timestamp
+                let expTimestamp = jsonPayload.exp;
+                // Convert the timestamp to a Date and return it
+                return new Date(expTimestamp * 1000);
+            } else {
+                return null;
+            }
+        }
     </script>
 </div>
 </body>

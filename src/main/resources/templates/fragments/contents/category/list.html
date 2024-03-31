@@ -149,7 +149,12 @@
                 contentType: 'application/json',
                 data: JSON.stringify(ids),
                 success: function (result) {
-                    window.location.href = cateURL + "?success";
+                    if(result === ""){
+                        ids.forEach(function(id) {
+                            $('table tbody tr').filter(':has(:checkbox[value="' + id + '"])').remove();
+                        });
+                        toast({message: "Delete successfully", type: "success"});
+                    }
                 },
                 error: function (xhr) {
                     if (xhr.status === 400) {

@@ -16,7 +16,7 @@ import java.util.List;
 //@Data
 @Entity
 @Table(name = "user")
-public class UserEntity extends BaseEntity{
+public class UserEntity extends BaseEntity {
 
     @Column(name = "user_name", unique = true, nullable = false)
     private String userName;
@@ -29,7 +29,10 @@ public class UserEntity extends BaseEntity{
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
-                    joinColumns = @JoinColumn(name = "user_id"),
-                    inverseJoinColumns = @JoinColumn(name = "role_id"))
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<RoleEntity> roles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<TokenEntity> tokens = new ArrayList<>();
 }

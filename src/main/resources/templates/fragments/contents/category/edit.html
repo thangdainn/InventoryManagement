@@ -134,6 +134,12 @@
                             error += errorMessage + "\n";
                         });
                         toast({message: error, type: "danger"})
+                    } else if (xhr.status === 404) {
+                        let error = "Category not found";
+                        toast({message: error, type: "danger"})
+                    }   else if (xhr.status === 403) {
+                        let error = "You don't have permission to access this resource";
+                        toast({message: error, type: "danger"})
                     }
                 }
             });
