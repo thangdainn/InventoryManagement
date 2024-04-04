@@ -12,5 +12,7 @@ import java.util.List;
 public interface IRoleRepository extends JpaRepository<RoleEntity, Integer> {
     RoleEntity findByName(String name);
     List<RoleEntity> findByUsers(UserEntity user);
+
+    List<RoleEntity> findAllByActiveFlag(Integer activeFlag);
     Page<RoleEntity> findByNameContaining(@Param("keyword") String name, Pageable pageable);
 }

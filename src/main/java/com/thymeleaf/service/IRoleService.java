@@ -9,6 +9,7 @@ import java.util.List;
 public interface IRoleService {
     RoleDTO findByName(RoleDTO dto);
     List<RoleDTO> findAll();
+    List<RoleDTO> findAllByActiveFlag(Integer activeFlag);
     List<RoleDTO> findByUser_Id(Integer id);
     RoleDTO save(RoleDTO dto);
     Page<RoleDTO> findAll(Pageable pageable);

@@ -57,6 +57,14 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
+    public List<CategoryDTO> findAllByActiveFlag(Integer activeFlag) {
+        List<CategoryEntity> list = categoryRepository.findAllByActiveFlag(activeFlag);
+        return list.stream().map(category -> {
+            return categoryConverter.toDTO(category);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public List<CategoryDTO> findAll() {
         List<CategoryEntity> results = categoryRepository.findAll();
         return results.stream().map(category -> {
@@ -67,19 +75,13 @@ public class CategoryService implements ICategoryService {
     @Override
     public CategoryDTO findByCode(String code) {
         Optional<CategoryEntity> optional = categoryRepository.findByCode(code);
-        if (optional.isPresent()) {
-            return categoryConverter.toDTO(optional.get());
-        }
-        return null;
+        return optional.map(categoryEntity -> categoryConverter.toDTO(categoryEntity)).orElse(null);
     }
 
     @Override
     public CategoryDTO findById(Integer id) {
         Optional<CategoryEntity> optional = categoryRepository.findById(id);
-        if (optional.isPresent()) {
-            return categoryConverter.toDTO(optional.get());
-        }
-        return null;
+        return optional.map(categoryEntity -> categoryConverter.toDTO(categoryEntity)).orElse(null);
     }
 
     @Override

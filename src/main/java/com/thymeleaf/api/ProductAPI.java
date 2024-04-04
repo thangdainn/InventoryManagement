@@ -1,12 +1,25 @@
 package com.thymeleaf.api;
 
-import com.thymeleaf.dto.ProductInfoDTO;
+import com.thymeleaf.api.input.ProductInput;
+import com.thymeleaf.api.output.CategoryOutput;
+import com.thymeleaf.api.output.ProductOutput;
+import com.thymeleaf.dto.*;
 import com.thymeleaf.service.IProductService;
+import com.thymeleaf.utils.Constant;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -23,20 +36,50 @@ public class ProductAPI {
     @Autowired
     private IProductService productService;
 
-//    @GetMapping(value = "/category")
-//    public CategoryOutput showCategory(@RequestParam(value = "page", required = false) Integer page,
-//                                       @RequestParam(value = "limit", required = false) Integer limit) {
-//        CategoryOutput result = new CategoryOutput();
-//        if (page != null && limit != null) {
-//            result.setPage(page);
-//            Pageable pageable = PageRequest.of(page - 1, limit);
-//            result.setListResult(categoryService.findAll(pageable));
-//            result.setTotalPage((int) Math.ceil((double) categoryService.totalItem() / limit));
-//        } else {
-//            result.setListResult(categoryService.findAll());
-//        }
-//        return result;
-//    }
+    @GetMapping
+    public ResponseEntity<ProductOutput> getProducts(@Valid @ModelAttribute ProductInput input) {
+        ProductOutput result = new ProductOutput();
+
+        if (input.getPage() != null){
+            Sort sortParameters;
+            if (input.getSort() != null) {
+                String[] sortSplit = input.getSort().split(",");
+                String direction = sortSplit.length > 1 ? sortSplit[1] : "asc";
+                sortParameters = Sort.by(Sort.Direction.fromString(direction), sortSplit[0]);
+            } else {
+                sortParameters = Sort.unsorted();
+            }
+            Pageable pageable = PageRequest.of(input.getPage(), input.getLimit() , sortParameters);
+
+            input.setKeyword(input.getKeyword().trim());
+            result.setPage(pageable.getPageNumber());
+            result.setSize(pageable.getPageSize());
+//            result.setCategoryCode(input.getCategoryCode());
+            Page<ProductInfoDTO> pageResult;
+            if (!input.getCategoryCode().equals("")){
+                pageResult = productService.findWithDynamicFilters(input.getKeyword(), input.getCategoryCode(), 1, pageable);
+            }else if (!input.getKeyword().equals("")){
+                pageResult = productService.findByNameContaining(input.getKeyword(), 1, pageable);
+            } else {
+                pageResult = productService.findAll(1, pageable);
+            }
+            result.setListResult(pageResult.getContent());
+            result.setTotalPage(pageResult.getTotalPages());
+        } else {
+            result.setListResult(productService.findAllByActiveFlag(input.getActiveFlag()));
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping(value = {"/{code}"})
+    public ResponseEntity<ProductInfoDTO> getProduct(@PathVariable(name = "code") String code) {
+        ProductInfoDTO product = productService.findByCode(code);
+        if (product == null){
+            throw new RuntimeException("Product is not found");
+        }
+        return ResponseEntity.ok(product);
+    }
 
     @PostMapping
     public ResponseEntity<?> createProduct(@Valid @RequestPart("product") ProductInfoDTO model,
@@ -51,7 +94,6 @@ public class ProductAPI {
     }
 
     @PutMapping(value = "/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateProduct(@Valid @RequestPart("product") ProductInfoDTO model,
                                         @RequestPart(value = "multipartFile", required = false) MultipartFile file,
                                         @PathVariable("id") Integer id) throws IOException {
@@ -67,6 +109,7 @@ public class ProductAPI {
     }
 
     @DeleteMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> delete(@RequestBody Integer[] ids, BindingResult bindingResult){
         if (ids == null || ids.length == 0){
             bindingResult.addError(new FieldError("category", "ids", "Please select item."));
@@ -78,6 +121,6 @@ public class ProductAPI {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages);
         }
         productService.delete(ids);
-        return ResponseEntity.ok("");
+        return ResponseEntity.ok("Delete Successfully");
     }
 }

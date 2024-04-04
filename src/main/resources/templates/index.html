@@ -36,31 +36,6 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
-    <script>
-        const slideInLeftKeyframes = `
-                      @keyframes slideInLeft {
-                        from {
-                          opacity: 0;
-                          transform: translateX(calc(100% + 32px));
-                        }
-                        to {
-                          opacity: 1;
-                          transform: translateX(0);
-                        }
-                      }
-                      `;
-        const fadeOutKeyframes = `
-                      @keyframes fadeOut {
-                         to {
-                           opacity: 0;
-                             }
-                      }
-                      `;
-        const styleElement = $('<style>').attr('type', 'text/css').text(slideInLeftKeyframes + fadeOutKeyframes);
-        $('head').append(styleElement);
-    </script>
-
-
 </head>
 
 <body class="nav-md footer_fixed">

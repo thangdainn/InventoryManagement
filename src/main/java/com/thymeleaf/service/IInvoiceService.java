@@ -12,6 +12,7 @@ public interface IInvoiceService {
 //    void delete(Integer[] ids);
 //    Page<InvoiceDTO> findAll(Pageable pageable);
     List<InvoiceDTO> findByType(Integer type);
+    List<InvoiceDTO> findAllByTypeAndActiveFlag(Integer type, Integer activeFlag);
     Page<InvoiceDTO> findByType(Integer type, Pageable pageable);
     InvoiceDTO findById(Integer id);
     InvoiceDTO findByCode(String code);

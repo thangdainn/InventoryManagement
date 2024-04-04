@@ -14,4 +14,5 @@ public class HistoryInput {
     private String keyword = "";
     private String categoryCode = "";
     private Integer type = Constant.TYPE_ALL;
+    private Integer activeFlag = 1;
 }

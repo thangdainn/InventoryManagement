@@ -12,4 +12,5 @@ import lombok.Setter;
 public class ProductInStokeInput {
     private String keyword = "";
     private String categoryCode = "";
+    private Integer activeFlag = 1;
 }

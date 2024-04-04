@@ -12,6 +12,7 @@ public interface IProductService {
     void delete(Integer[] ids);
     Page<ProductInfoDTO> findAll(Integer activeFlag, Pageable pageable);
     List<ProductInfoDTO> findAll();
+    List<ProductInfoDTO> findAllByActiveFlag(Integer activeFlag);
     List<ProductInfoDTO> findByProductInStoke();
     ProductInfoDTO findByCode(String code);
     ProductInfoDTO findById(Integer id);

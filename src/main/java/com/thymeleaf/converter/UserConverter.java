@@ -39,13 +39,10 @@ public class UserConverter {
         dto.setUserName(entity.getUserName());
         dto.setPassword(entity.getPassword());
         dto.setName(entity.getName());
-        List<RoleDTO> roles = entity.getRoles()
-                .stream()
-                .map(roleEntity -> {
-                    return roleConverter.toDTO(roleEntity);
-                })
-                .collect(Collectors.toList());
-        dto.setRoles(roles);
+        dto.setRoleIds(entity.getRoles().stream()
+                .map(role -> role.getId())
+                .collect(Collectors.toList())
+                .toArray(new Integer[0]));
         dto.setActiveFlag(entity.getActiveFlag());
         dto.setCreatedDate(entity.getCreatedDate());
         dto.setModifiedDate(entity.getModifiedDate());

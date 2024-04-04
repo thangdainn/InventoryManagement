@@ -111,6 +111,14 @@ public class InvoiceService implements IInvoiceService {
     }
 
     @Override
+    public List<InvoiceDTO> findAllByTypeAndActiveFlag(Integer type, Integer activeFlag) {
+        List<InvoiceEntity> results = invoiceRepository.findByTypeAndActiveFlag(type, activeFlag);
+        return results.stream().map(invoice -> {
+            return invoiceConverter.toDTO(invoice);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public Page<InvoiceDTO> findByType(Integer type, Pageable pageable) {
         Page<InvoiceEntity> entityPage = invoiceRepository.findByType(type, pageable);
         List<InvoiceDTO> dtoList = entityPage.stream().map(invoice -> {

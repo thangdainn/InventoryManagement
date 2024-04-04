@@ -97,6 +97,14 @@ public class ProductService implements IProductService {
     }
 
     @Override
+    public List<ProductInfoDTO> findAllByActiveFlag(Integer activeFlag) {
+        List<ProductInfoEntity> results = productRepository.findAllByActiveFlag(activeFlag);
+        return results.stream().map(product -> {
+            return productInfoConverter.toDTO(product);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public List<ProductInfoDTO> findByProductInStoke() {
         List<ProductInfoEntity> results = productRepository.findByProductInStoke();
         return results.stream().map(product -> {

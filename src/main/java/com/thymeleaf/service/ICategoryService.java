@@ -11,6 +11,7 @@ public interface ICategoryService {
     void delete(Integer[] ids);
     Page<CategoryDTO> findAll(Pageable pageable);
     List<CategoryDTO> findAll();
+    List<CategoryDTO> findAllByActiveFlag(Integer activeFlag);
     CategoryDTO findByCode(String code);
     CategoryDTO findById(Integer id);
     Page<CategoryDTO> findByNameContaining(String keyword, Pageable pageable);

@@ -1,18 +1,35 @@
 package com.thymeleaf.api;
 
+import com.thymeleaf.api.input.InvoiceInput;
+import com.thymeleaf.api.output.InvoiceOutput;
 import com.thymeleaf.dto.InvoiceDTO;
+import com.thymeleaf.dto.ProductInfoDTO;
 import com.thymeleaf.service.ICategoryService;
 import com.thymeleaf.service.IInvoiceService;
+import com.thymeleaf.service.IProductService;
+import com.thymeleaf.utils.Constant;
+import com.thymeleaf.utils.TypeInvoice;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,25 +38,57 @@ import java.util.stream.Collectors;
 public class InvoiceAPI {
 
     @Autowired
-    private ICategoryService categoryService;
-
-    @Autowired
     private IInvoiceService invoiceService;
 
-//    @GetMapping(value = "/category")
-//    public CategoryOutput showCategory(@RequestParam(value = "page", required = false) Integer page,
-//                                       @RequestParam(value = "limit", required = false) Integer limit) {
-//        CategoryOutput result = new CategoryOutput();
-//        if (page != null && limit != null) {
-//            result.setPage(page);
-//            Pageable pageable = PageRequest.of(page - 1, limit);
-//            result.setListResult(categoryService.findAll(pageable));
-//            result.setTotalPage((int) Math.ceil((double) categoryService.totalItem() / limit));
-//        } else {
-//            result.setListResult(categoryService.findAll());
-//        }
-//        return result;
-//    }
+    @GetMapping
+    public ResponseEntity<InvoiceOutput> getInvoices(@Valid @ModelAttribute InvoiceInput input) {
+        InvoiceOutput result = new InvoiceOutput();
+        Integer type = checkType(input.getTypeInvoice());
+
+        if (input.getPage() != null){
+            Sort sortParameters;
+            if (input.getSort() != null) {
+                String[] sortSplit = input.getSort().split(",");
+                String direction = sortSplit.length > 1 ? sortSplit[1] : "asc";
+                sortParameters = Sort.by(Sort.Direction.fromString(direction), sortSplit[0]);
+            } else {
+                sortParameters = Sort.unsorted();
+            }
+            Pageable pageable = PageRequest.of(input.getPage(), input.getLimit() , sortParameters);
+
+            input.setKeyword(input.getKeyword().trim());
+            result.setPage(pageable.getPageNumber());
+            result.setSize(pageable.getPageSize());
+            result.setCategoryCode(input.getCategoryCode());
+            Page<InvoiceDTO> page;
+            if (!input.getCategoryCode().isEmpty() || result.getFromDate() != null || result.getToDate() != null) {
+                if (input.getCategoryCode().isEmpty()){
+                    input.setCategoryCode(null);
+                }
+                page = invoiceService.findWithDynamicFilters(input.getKeyword(), input.getCategoryCode(), type,
+                        result.getFromDate(), result.getToDate(), pageable);
+            } else if (!input.getKeyword().isEmpty()) {
+                page = invoiceService.findByTypeAndProduct_NameContaining(input.getKeyword(), type, pageable);
+            } else {
+                page = invoiceService.findByType(type, pageable);
+            }
+            result.setListResult(page.getContent());
+            result.setTotalPage(page.getTotalPages());
+        } else {
+            result.setListResult(invoiceService.findAllByTypeAndActiveFlag(type ,input.getActiveFlag()));
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping(value = {"/{code}"})
+    public ResponseEntity<InvoiceDTO> getInvoice(@PathVariable(name = "code") String code) {
+        InvoiceDTO invoice = invoiceService.findByCode(code);
+        if (invoice == null) {
+            throw new RuntimeException("Invoice not found");
+        }
+        return ResponseEntity.ok(invoice);
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
@@ -97,4 +146,12 @@ public class InvoiceAPI {
 //        invoiceService.delete(ids);
 //        return ResponseEntity.ok("");
 //    }
+
+    private Integer checkType(String typeInvoice) {
+        if (typeInvoice.equals(TypeInvoice.GOODS_RECEIPT.toString())) {
+            return 1;
+        }
+        return 2;
+    }
+
 }

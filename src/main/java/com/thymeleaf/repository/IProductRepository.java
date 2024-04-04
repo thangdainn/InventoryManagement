@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public interface IProductRepository extends JpaRepository<ProductInfoEntity, Integer> {
     Page<ProductInfoEntity> findAllByActiveFlag(Integer active_flag, Pageable pageable);
+
+    List<ProductInfoEntity> findAllByActiveFlag(Integer active_flag);
     @Modifying
     @Transactional
     @Query("UPDATE ProductInfoEntity p SET p.activeFlag = 0 WHERE p.id IN :ids")

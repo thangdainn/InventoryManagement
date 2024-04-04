@@ -78,14 +78,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isByPassToken(@NonNull HttpServletRequest request) {
         final List<Pair<String, String>> byPassToken = Arrays.asList(
-                new Pair<>("/register", "POST"),
+                new Pair<>("/user/register", "POST"),
                 new Pair<>("/vendors/**", "GET"),
                 new Pair<>("/build/**", "GET"),
                 new Pair<>("/css/**", "GET"),
                 new Pair<>("/images/**", "GET"),
                 new Pair<>("/js/**", "GET"),
                 new Pair<>("/refreshToken", "POST"),
-                new Pair<>("/signin", "POST")
+                new Pair<>("/user/signin", "POST")
         );
         for (Pair<String, String> pair : byPassToken) {
             if (request.getRequestURI().equals(pair.a) && request.getMethod().equals(pair.b)) {

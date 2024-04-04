@@ -12,4 +12,8 @@ import lombok.Setter;
 public class ProductInput {
     private String keyword = "";
     private String categoryCode = "";
+    private Integer activeFlag = 1;
+    private Integer page;
+    private Integer limit = 4;
+    private String sort;
 }

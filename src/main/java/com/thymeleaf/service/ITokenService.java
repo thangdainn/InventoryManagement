@@ -11,4 +11,5 @@ public interface ITokenService {
     TokenDTO findByRefreshToken(String refreshToken);
     TokenDTO findByUser_Id(Integer userId);
 
+    void delete(Integer userId);
 }

@@ -27,5 +27,6 @@ public interface IInvoiceRepository extends JpaRepository<InvoiceEntity, Integer
 
     Page<InvoiceEntity> findByType(Integer type ,Pageable pageable);
     List<InvoiceEntity> findByType(Integer type);
+    List<InvoiceEntity> findByTypeAndActiveFlag(Integer type, Integer activeFlag);
     Optional<InvoiceEntity> findByCode(String code);
 }

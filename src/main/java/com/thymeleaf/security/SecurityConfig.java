@@ -52,30 +52,28 @@ public class SecurityConfig {
                 .csrf((csrf) -> csrf.disable())
 //                .csrf().disable()
                 .authorizeHttpRequests((requests) -> requests
-//                        .requestMatchers("/menu/**", "/role/**", "history")
-//                        .hasAuthority("ADMIN")
-//                        .requestMatchers("/user/**", "/goods-receipt/**", "/goods-issue/**")
-//                        .hasAnyAuthority("ADMIN", "STAFF")
-                        .requestMatchers("/register", "/vendors/**", "/build/**", "/css/**", "/images/**", "/js/**", "/refreshToken", "/signin")
+                        .requestMatchers("/user/register", "/user/signin", "/refreshToken")
+                        .permitAll()
+                        .requestMatchers("/vendors/**", "/build/**", "/css/**", "/images/**", "/js/**")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
-//                .formLogin((form) -> form
-//                        .loginPage("/login")
-//                        .usernameParameter("userName")
-//                        .passwordParameter("password")
-//                        .permitAll()
-//                        .successHandler(customSuccessHandler)
-//                        .failureUrl("/loginFail")
-////                        .failureForwardUrl("/loginFail")
-////                        .loginProcessingUrl("/login")
-//                )
+                .formLogin((form) -> form
+                        .loginPage("/login")
+                        .usernameParameter("userName")
+                        .passwordParameter("password")
+                        .permitAll()
+                        .successHandler(customSuccessHandler)
+                        .failureUrl("/loginFail")
+//                        .failureForwardUrl("/loginFail")
+//                        .loginProcessingUrl("/login")
+                )
                 .logout((logout) -> logout
                         .logoutSuccessUrl("/login")
-                        .invalidateHttpSession(true))
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                        .invalidateHttpSession(true));
+
         http.authenticationProvider(authenticationProvider());
-//        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

@@ -43,6 +43,14 @@ public class RoleService implements IRoleService {
     }
 
     @Override
+    public List<RoleDTO> findAllByActiveFlag(Integer activeFlag) {
+        List<RoleEntity> entities = roleRepository.findAllByActiveFlag(activeFlag);
+        return entities.stream().map(role -> {
+            return roleConverter.toDTO(role);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public List<RoleDTO> findByUser_Id(Integer id) {
         List<RoleEntity> entities = roleRepository.findByUsers(userRepository.findById(id).get());
         return entities.stream().map(role -> {

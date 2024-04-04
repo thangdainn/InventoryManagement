@@ -42,8 +42,6 @@ public class UserService implements IUserService {
     @Override
     public UserDTO findByUserNameAndPassword(UserDTO dto) {
         Optional<UserEntity> entities = userRepository.findByUserNameAndPasswordAndActiveFlag(dto.getUserName(), dto.getPassword(), 1);
-//        UserEntity entity = entities.isEmpty() ? null : entities.get(0);
-//        return entity == null ? null : userConverter.toDTO(entity);
         return entities.map(entity -> userConverter.toDTO(entity)).orElse(null);
     }
 
@@ -98,6 +96,14 @@ public class UserService implements IUserService {
             return userConverter.toDTO(user);
         }).collect(Collectors.toList());
         return new PageImpl<>(dtoList, entityPage.getPageable(), entityPage.getTotalElements());
+    }
+
+    @Override
+    public List<UserDTO> findAllByActiveFlag(Integer active_flag) {
+        List<UserEntity> list = userRepository.findAllByActiveFlag(active_flag);
+        return list.stream().map(user -> {
+            return userConverter.toDTO(user);
+        }).collect(Collectors.toList());
     }
 
     @Override

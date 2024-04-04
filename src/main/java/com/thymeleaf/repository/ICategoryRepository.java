@@ -12,4 +12,6 @@ public interface ICategoryRepository extends JpaRepository<CategoryEntity, Integ
     List<CategoryEntity> findByNameContaining(String keyword);
     Page<CategoryEntity> findByNameContaining(String keyword, Pageable pageable);
     Optional<CategoryEntity> findByCode(String code);
+
+    List<CategoryEntity> findAllByActiveFlag(Integer activeFlag);
 }

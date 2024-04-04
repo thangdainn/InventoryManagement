@@ -9,6 +9,7 @@ import com.thymeleaf.repository.IUserRepository;
 import com.thymeleaf.service.ITokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -60,6 +61,12 @@ public class TokenService implements ITokenService {
     public TokenDTO findByUser_Id(Integer userId) {
         Optional<TokenEntity> optional = tokenRepository.findByUser_Id(userId);
         return optional.map(entity -> tokenConverter.toDTO(entity)).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Integer userId) {
+        tokenRepository.deleteByUser_Id(userId);
     }
 
 }

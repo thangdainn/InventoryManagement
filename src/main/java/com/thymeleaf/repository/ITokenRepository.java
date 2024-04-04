@@ -9,4 +9,6 @@ public interface ITokenRepository extends JpaRepository<TokenEntity, Integer> {
 
     Optional<TokenEntity> findByUser_Id(Integer id);
     Optional<TokenEntity> findByRefreshToken(String refreshToken);
+
+    void deleteByUser_Id(Integer userId);
 }

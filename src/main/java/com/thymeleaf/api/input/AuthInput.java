@@ -12,4 +12,5 @@ import lombok.Setter;
 public class AuthInput {
     private String role;
     private String menu;
+    private Integer activeFlag = 1;
 }
