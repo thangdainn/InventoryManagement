@@ -114,14 +114,14 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         url = "/home";
         CustomUserDetail customUserDetail = (CustomUserDetail) authentication.getPrincipal();
         UserDTO userDTO = userService.findByUserName(customUserDetail.getUsername(), 1);
-        TokenDTO tokenDTO = tokenProvider.generateToken(customUserDetail.getUsername(), userDTO.getProviderId());
-        tokenDTO.setUserId(userDTO.getId());
-        tokenService.save(tokenDTO);
-        List<String> listRole = customUserDetail.getAuthorities().stream()
-                .map(item -> item.getAuthority()).collect(Collectors.toList());
-        JwtResponse jwtResponse = new JwtResponse(tokenDTO.getToken(), tokenDTO.getRefreshToken(), customUserDetail.getUsername(), listRole);
+//        TokenDTO tokenDTO = tokenProvider.generateToken(customUserDetail.getUsername(), userDTO.getProviderId());
+//        tokenDTO.setUserId(userDTO.getId());
+//        tokenService.save(tokenDTO);
+//        List<String> listRole = customUserDetail.getAuthorities().stream()
+//                .map(item -> item.getAuthority()).collect(Collectors.toList());
+//        JwtResponse jwtResponse = new JwtResponse(tokenDTO.getToken(), tokenDTO.getRefreshToken(), customUserDetail.getUsername(), listRole);
         HttpSession session = request.getSession();
-        session.setAttribute(Constant.JWT, jwtResponse);
+//        session.setAttribute(Constant.JWT, jwtResponse);
         session.setAttribute(Constant.MENUS, menuList);
         session.setAttribute(Constant.USER, userDetails);
         return url;

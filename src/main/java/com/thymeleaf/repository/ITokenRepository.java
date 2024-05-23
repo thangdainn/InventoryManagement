@@ -13,4 +13,5 @@ public interface ITokenRepository extends JpaRepository<TokenEntity, Integer> {
 
     void deleteByUser_Id(Integer userId);
     void deleteByRefreshTokenExpirationDateBefore(Timestamp date);
+    void deleteByRefreshToken(String refreshToken);
 }
