@@ -1,6 +1,5 @@
-package com.thymeleaf.api.input;
+package com.thymeleaf.api.request;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

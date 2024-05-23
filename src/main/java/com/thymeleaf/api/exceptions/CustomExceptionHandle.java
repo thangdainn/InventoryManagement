@@ -14,7 +14,7 @@ import java.nio.file.AccessDeniedException;
 
 @RestControllerAdvice
 public class CustomExceptionHandle {
-    @ExceptionHandler({Exception.class, NoHandlerFoundException.class, NullPointerException.class})
+    @ExceptionHandler({Exception.class, NoHandlerFoundException.class, NullPointerException.class, AccessDeniedException.class})
     public ProblemDetail handleSecurityException(Exception ex) {
         ProblemDetail errorDetail = null;
         if (ex instanceof BadCredentialsException) {

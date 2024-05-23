@@ -1,7 +1,7 @@
 package com.thymeleaf.controller;
 
-import com.thymeleaf.api.input.RoleInput;
-import com.thymeleaf.api.output.RoleOutput;
+import com.thymeleaf.api.request.RoleInput;
+import com.thymeleaf.api.response.RoleOutput;
 import com.thymeleaf.dto.MenuDTO;
 import com.thymeleaf.dto.RoleDTO;
 import com.thymeleaf.service.IRoleService;

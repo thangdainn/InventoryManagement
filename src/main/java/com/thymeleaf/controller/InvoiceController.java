@@ -1,7 +1,7 @@
 package com.thymeleaf.controller;
 
-import com.thymeleaf.api.input.InvoiceInput;
-import com.thymeleaf.api.output.InvoiceOutput;
+import com.thymeleaf.api.request.InvoiceInput;
+import com.thymeleaf.api.response.InvoiceOutput;
 import com.thymeleaf.dto.CategoryDTO;
 import com.thymeleaf.dto.InvoiceDTO;
 import com.thymeleaf.dto.MenuDTO;

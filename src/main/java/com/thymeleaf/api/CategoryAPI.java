@@ -1,12 +1,9 @@
 package com.thymeleaf.api;
 
-import com.thymeleaf.api.input.CategoryInput;
-import com.thymeleaf.api.output.CategoryOutput;
+import com.thymeleaf.api.request.CategoryInput;
+import com.thymeleaf.api.response.CategoryOutput;
 import com.thymeleaf.dto.CategoryDTO;
-import com.thymeleaf.dto.MenuDTO;
 import com.thymeleaf.service.ICategoryService;
-import com.thymeleaf.utils.Constant;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -17,8 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/api/category")
 public class CategoryAPI {
 
     @Autowired
@@ -68,6 +63,7 @@ public class CategoryAPI {
     }
 
     @GetMapping(value = {"/{code}"})
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<CategoryDTO> getCategory(@PathVariable(name = "code") String code) {
         CategoryDTO category = categoryService.findByCode(code);
         if (category == null) {

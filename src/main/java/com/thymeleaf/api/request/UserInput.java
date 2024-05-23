@@ -1,4 +1,4 @@
-package com.thymeleaf.api.input;
+package com.thymeleaf.api.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryInput {
+public class UserInput {
     private String keyword = "";
     private Integer activeFlag = 1;
     private Integer page;

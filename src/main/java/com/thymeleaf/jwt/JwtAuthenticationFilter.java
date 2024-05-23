@@ -1,10 +1,6 @@
 package com.thymeleaf.jwt;
 
 import com.thymeleaf.security.CustomUserDetailService;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,10 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -27,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
+
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private HandlerExceptionResolver exceptionResolver;
 
@@ -36,7 +33,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private CustomUserDetailService customUserDetailService;
 
-    @Autowired
     public JwtAuthenticationFilter(HandlerExceptionResolver exceptionResolver) {
         this.exceptionResolver = exceptionResolver;
     }
@@ -51,6 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        log.info("JwtAuthenticationFilter is called");
+
         try {
             if (isByPassToken(request)) {
                 filterChain.doFilter(request, response);
@@ -59,7 +57,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
             if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
                 String userName = jwtTokenProvider.getUserNameFromJwt(jwt);
-                UserDetails userDetails = customUserDetailService.loadUserByUsername(userName);
+                String providerId = jwtTokenProvider.getProviderIdFromJwt(jwt);
+//                UserDetails userDetails = customUserDetailService.loadUserByUsername(userName);
+                UserDetails userDetails = customUserDetailService.loadUserByUsernameAndProviderId(userName, providerId);
                 if (userDetails != null) {
 //                    Set thong tin cho security context
                     UsernamePasswordAuthenticationToken authenticationToken
@@ -77,18 +77,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isByPassToken(@NonNull HttpServletRequest request) {
+        AntPathMatcher antPathMatcher = new AntPathMatcher();
         final List<Pair<String, String>> byPassToken = Arrays.asList(
-                new Pair<>("/user/register", "POST"),
+                new Pair<>("/register", "POST"),
                 new Pair<>("/vendors/**", "GET"),
                 new Pair<>("/build/**", "GET"),
                 new Pair<>("/css/**", "GET"),
                 new Pair<>("/images/**", "GET"),
                 new Pair<>("/js/**", "GET"),
-                new Pair<>("/refreshToken", "POST"),
-                new Pair<>("/user/signin", "POST")
+                new Pair<>("/refresh-token", "POST"),
+                new Pair<>("/signin", "POST"),
+                new Pair<>("/login/**", "POST")
         );
+        String uri = request.getRequestURI();
+        String method = request.getMethod();
         for (Pair<String, String> pair : byPassToken) {
-            if (request.getRequestURI().equals(pair.a) && request.getMethod().equals(pair.b)) {
+            if (antPathMatcher.match(pair.a, uri) && antPathMatcher.match(pair.b, method)) {
                 return true;
             }
         }

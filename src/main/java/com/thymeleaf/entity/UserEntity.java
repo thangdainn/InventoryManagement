@@ -21,11 +21,14 @@ public class UserEntity extends BaseEntity {
     @Column(name = "user_name", unique = true, nullable = false)
     private String userName;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = true)
     private String name;
+
+    @Column(name = "provider_id")
+    private String providerId;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",

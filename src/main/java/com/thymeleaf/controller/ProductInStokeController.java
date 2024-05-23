@@ -1,7 +1,7 @@
 package com.thymeleaf.controller;
 
-import com.thymeleaf.api.input.ProductInStokeInput;
-import com.thymeleaf.api.output.ProductInStokeOutput;
+import com.thymeleaf.api.request.ProductInStokeInput;
+import com.thymeleaf.api.response.ProductInStokeOutput;
 import com.thymeleaf.dto.CategoryDTO;
 import com.thymeleaf.dto.MenuDTO;
 import com.thymeleaf.dto.ProductInStokeDTO;

@@ -1,6 +1,6 @@
-package com.thymeleaf.api.output;
+package com.thymeleaf.api.response;
 
-import com.thymeleaf.dto.MenuDTO;
+import com.thymeleaf.dto.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,9 +13,10 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuOutput {
+public class UserOutput {
     private Integer page;
     private Integer size;
     private Integer totalPage;
-    private List<MenuDTO> listResult = new ArrayList<>();
+    private String keyword;
+    private List<UserDTO> listResult = new ArrayList<>();
 }

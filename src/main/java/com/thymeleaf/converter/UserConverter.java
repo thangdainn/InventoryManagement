@@ -12,9 +12,6 @@ import java.util.stream.Collectors;
 @Component
 public class UserConverter {
 
-    @Autowired
-    private RoleConverter roleConverter;
-
     public UserEntity toEntity(UserDTO dto){
         UserEntity entity = new UserEntity();
         if (dto.getId() != null){
@@ -23,6 +20,7 @@ public class UserConverter {
         entity.setUserName(dto.getUserName());
         entity.setPassword(dto.getPassword());
         entity.setName(dto.getName());
+        entity.setProviderId(dto.getProviderId());
         return entity;
     }
 
@@ -30,6 +28,7 @@ public class UserConverter {
         entity.setUserName(dto.getUserName());
         entity.setPassword(dto.getPassword());
         entity.setName(dto.getName());
+        entity.setProviderId(dto.getProviderId());
         return entity;
     }
 
@@ -39,6 +38,7 @@ public class UserConverter {
         dto.setUserName(entity.getUserName());
         dto.setPassword(entity.getPassword());
         dto.setName(entity.getName());
+        dto.setProviderId(entity.getProviderId());
         dto.setRoleIds(entity.getRoles().stream()
                 .map(role -> role.getId())
                 .collect(Collectors.toList())

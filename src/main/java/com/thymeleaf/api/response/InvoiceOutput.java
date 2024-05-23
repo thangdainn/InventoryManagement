@@ -1,11 +1,12 @@
-package com.thymeleaf.api.output;
+package com.thymeleaf.api.response;
 
-import com.thymeleaf.dto.HistoryDTO;
+import com.thymeleaf.dto.InvoiceDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,12 +14,15 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class HistoryOutput {
+public class InvoiceOutput {
     private Integer page;
     private Integer size;
     private Integer totalPage;
     private String keyword;
     private String categoryCode;
     private Integer type;
-    private List<HistoryDTO> listResult = new ArrayList<>();
+    private String url;
+    private Timestamp fromDate;
+    private Timestamp toDate;
+    private List<InvoiceDTO> listResult = new ArrayList<>();
 }

@@ -55,7 +55,9 @@
                         <p class="change_link">New to site?
                             <a id="btn-to-register" style="cursor: pointer"> Create Account </a>
                         </p>
-
+                        <a th:href="@{/oauth2/authorization/google}"  style="cursor: pointer"> Login with Google </a><br>
+                        <a th:href="@{/oauth2/authorization/github}"  style="cursor: pointer"> Login with Github </a><br>
+                        <a th:href="@{/oauth2/authorization/facebook}"  style="cursor: pointer"> Login with Facebook </a>
                         <div class="clearfix"></div>
                         <br/>
                         <div>
@@ -68,7 +70,7 @@
 
         <div id="register" class="animate form registration-form" style="display: none">
             <section class="login_content">
-                <form th:action="@{/register}" method="post"
+                <form th:action="@{/user/register}" method="post"
                       th:object="${userData}"
                       id="form-submit">
                     <h1>Create Account</h1>
@@ -159,7 +161,7 @@
 
     function addUser(data) {
         $.ajax({
-            url: '/register',
+            url: '/user/register',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),

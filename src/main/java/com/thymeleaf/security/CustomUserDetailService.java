@@ -17,7 +17,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
 
-    private final IUserRepository userRepository;
+    @Autowired
+    private IUserRepository userRepository;
 
     @Autowired
     private IRoleRepository roleRepository;
@@ -25,6 +26,16 @@ public class CustomUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<UserEntity> userEntities = userRepository.findByUserNameAndActiveFlag(username, 1);
+        if (userEntities.isPresent()) {
+            UserEntity user = userEntities.get();
+            user.setRoles(roleRepository.findByUsers(user));
+            return new CustomUserDetail(user);
+        } else {
+            return new CustomUserDetail(username, "", "", new ArrayList<>());
+        }
+    }
+    public UserDetails loadUserByUsernameAndProviderId(String username, String providerId) throws UsernameNotFoundException {
+        Optional<UserEntity> userEntities = userRepository.findByUserNameAndProviderId(username, providerId);
         if (userEntities.isPresent()) {
             UserEntity user = userEntities.get();
             user.setRoles(roleRepository.findByUsers(user));

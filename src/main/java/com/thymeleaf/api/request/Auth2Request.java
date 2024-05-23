@@ -1,4 +1,4 @@
-package com.thymeleaf.api.input;
+package com.thymeleaf.api.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TokenInput {
-    private Integer userId;
+public class Auth2Request {
+    private String client_id;
+    private String client_secret;
 }

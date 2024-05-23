@@ -1,36 +1,30 @@
 package com.thymeleaf.api;
 
-import com.thymeleaf.api.input.UserInput;
-import com.thymeleaf.api.output.UserOutput;
-import com.thymeleaf.dto.MenuDTO;
-import com.thymeleaf.dto.RoleDTO;
+import com.thymeleaf.api.request.UserInput;
+import com.thymeleaf.api.response.UserOutput;
 import com.thymeleaf.dto.TokenDTO;
 import com.thymeleaf.dto.UserDTO;
 import com.thymeleaf.jwt.JwtTokenProvider;
 import com.thymeleaf.payload.request.LoginRequest;
 import com.thymeleaf.payload.response.JwtResponse;
 import com.thymeleaf.security.CustomUserDetail;
-import com.thymeleaf.service.IRoleService;
 import com.thymeleaf.service.ITokenService;
 import com.thymeleaf.service.IUserService;
-import com.thymeleaf.utils.Constant;
-import jakarta.servlet.http.HttpSession;
+import com.thymeleaf.utils.Provider;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -40,20 +34,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class UserAPI {
 
-    @Autowired
-    private IUserService userService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtTokenProvider tokenProvider;
-
-    @Autowired
-    private ITokenService tokenService;
+    private final IUserService userService;
 
     @GetMapping
     public ResponseEntity<UserOutput> getUsers(@ModelAttribute UserInput input) {
@@ -104,23 +89,7 @@ public class UserAPI {
         return ResponseEntity.ok(dto);
     }
 
-    @PostMapping(value = "/signin")
-    public ResponseEntity<?> login(@RequestBody LoginRequest user) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword())
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        CustomUserDetail customUserDetail = (CustomUserDetail) authentication.getPrincipal();
-        TokenDTO tokenDTO = tokenProvider.generateToken(customUserDetail);
-        UserDTO userDTO = userService.findByUserName(user.getUserName(), 1);
-        tokenDTO.setUserId(userDTO.getId());
-        tokenService.save(tokenDTO);
-        List<String> listRole = customUserDetail.getAuthorities().stream()
-                .map(role -> role.getAuthority()).collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(tokenDTO.getToken(), tokenDTO.getRefreshToken(), customUserDetail.getUsername(), customUserDetail.getName(), listRole));
-    }
-
-    @PostMapping(value = {"/register"})
+    @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO model, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getAllErrors().stream()
@@ -181,6 +150,6 @@ public class UserAPI {
     }
 
     private boolean checkUsername(String username) {
-        return userService.findByUserName(username, 0) != null;
+        return userService.findByUserNameAndProviderId(username, Provider.local.name()) != null;
     }
 }

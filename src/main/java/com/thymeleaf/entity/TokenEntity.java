@@ -17,17 +17,13 @@ import java.sql.Timestamp;
 @Table(name = "token")
 public class TokenEntity extends BaseEntity{
 
-    @NotNull
-    @Column(name = "access_token")
-    private String token;
+//    @NotNull
+//    @Column(name = "access_token")
+//    private String token;
 
 //    @NotNull
-    @Column(name = "token_type")
-    private String tokenType;
-
-    @NotNull
-    @Column(name = "expiration_date")
-    private Timestamp expirationDate;
+//    @Column(name = "expiration_date")
+//    private Timestamp expirationDate;
 
     @NotNull
     @Column(name = "refresh_token")

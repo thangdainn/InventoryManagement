@@ -1,7 +1,7 @@
 package com.thymeleaf.controller;
 
-import com.thymeleaf.api.input.UserInput;
-import com.thymeleaf.api.output.UserOutput;
+import com.thymeleaf.api.request.UserInput;
+import com.thymeleaf.api.response.UserOutput;
 import com.thymeleaf.dto.MenuDTO;
 import com.thymeleaf.dto.RoleDTO;
 import com.thymeleaf.dto.UserDTO;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

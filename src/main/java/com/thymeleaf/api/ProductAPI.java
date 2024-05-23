@@ -1,12 +1,9 @@
 package com.thymeleaf.api;
 
-import com.thymeleaf.api.input.ProductInput;
-import com.thymeleaf.api.output.CategoryOutput;
-import com.thymeleaf.api.output.ProductOutput;
+import com.thymeleaf.api.request.ProductInput;
+import com.thymeleaf.api.response.ProductOutput;
 import com.thymeleaf.dto.*;
 import com.thymeleaf.service.IProductService;
-import com.thymeleaf.utils.Constant;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -14,12 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/api/product")
 public class ProductAPI {
 
     @Autowired

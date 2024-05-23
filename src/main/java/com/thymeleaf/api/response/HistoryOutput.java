@@ -1,6 +1,6 @@
-package com.thymeleaf.api.output;
+package com.thymeleaf.api.response;
 
-import com.thymeleaf.dto.ProductInfoDTO;
+import com.thymeleaf.dto.HistoryDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,11 +13,12 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductOutput {
+public class HistoryOutput {
     private Integer page;
     private Integer size;
     private Integer totalPage;
     private String keyword;
     private String categoryCode;
-    private List<ProductInfoDTO> listResult = new ArrayList<>();
+    private Integer type;
+    private List<HistoryDTO> listResult = new ArrayList<>();
 }

@@ -1,4 +1,4 @@
-package com.thymeleaf.api.input;
+package com.thymeleaf.api.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

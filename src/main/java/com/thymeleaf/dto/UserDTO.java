@@ -1,5 +1,6 @@
 package com.thymeleaf.dto;
 
+import com.thymeleaf.utils.Provider;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +24,8 @@ public class UserDTO extends AbstractDTO<UserDTO>{
     @NotNull(message = "Role is required")
     @NotEmpty(message = "Role is required")
     private Integer[] roleIds;
+
+    private String providerId = Provider.local.name();
 
     private List<RoleDTO> roles = new ArrayList<>();
 }

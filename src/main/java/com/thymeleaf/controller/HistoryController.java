@@ -1,7 +1,7 @@
 package com.thymeleaf.controller;
 
-import com.thymeleaf.api.input.HistoryInput;
-import com.thymeleaf.api.output.HistoryOutput;
+import com.thymeleaf.api.request.HistoryInput;
+import com.thymeleaf.api.response.HistoryOutput;
 import com.thymeleaf.dto.CategoryDTO;
 import com.thymeleaf.dto.HistoryDTO;
 import com.thymeleaf.dto.MenuDTO;

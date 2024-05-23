@@ -1,32 +1,37 @@
 package com.thymeleaf.api;
 
-import com.thymeleaf.api.input.TokenInput;
+import com.thymeleaf.api.request.TokenInput;
 import com.thymeleaf.dto.RefreshTokenDTO;
+import com.thymeleaf.dto.RoleDTO;
 import com.thymeleaf.dto.TokenDTO;
 import com.thymeleaf.dto.UserDTO;
 import com.thymeleaf.jwt.JwtTokenProvider;
 import com.thymeleaf.payload.response.JwtResponse;
 import com.thymeleaf.security.CustomUserDetail;
+import com.thymeleaf.service.IRoleService;
 import com.thymeleaf.service.ITokenService;
 import com.thymeleaf.service.IUserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
+@RequiredArgsConstructor
 public class TokenAPI {
 
     @Autowired
     private IUserService userService;
+
+    private final IRoleService roleService;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
@@ -34,7 +39,15 @@ public class TokenAPI {
     @Autowired
     private ITokenService tokenService;
 
-    @PostMapping(value = "/refreshToken")
+
+//    @GetMapping("/token")
+//    public ResponseEntity<?> getToken(@AuthenticationPrincipal OAuth2User oAuth2User) {
+//        Authentication authentication = (Authentication) oAuth2User;
+//        CustomUserDetail customUserDetail = (CustomUserDetail) authentication.getPrincipal();
+//
+//        return ResponseEntity.ok(tokenProvider.generateToken(customUserDetail));
+//    }
+    @PostMapping(value = "/refresh-token")
     public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenDTO dto) {
         TokenDTO tokenDTO = tokenService.findByRefreshToken(dto.getRefreshToken());
         if (tokenDTO == null) {
@@ -44,15 +57,15 @@ public class TokenAPI {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token is expired.");
         }
         Integer tokenId = tokenDTO.getId();
-        CustomUserDetail userDetail = userService.loadUserByRefreshToken(dto.getRefreshToken());
-        tokenDTO = tokenProvider.generateToken(userDetail);
-        UserDTO userDTO = userService.findByUserName(userDetail.getUsername(), 1);
+        UserDTO userDTO = userService.loadUserByRefreshToken(dto.getRefreshToken());
+        tokenDTO = tokenProvider.generateToken(userDTO.getUserName(), userDTO.getProviderId());
+//        UserDTO userDTO = userService.findByUserName(userDTO.getUsername(), 1);
         tokenDTO.setUserId(userDTO.getId());
         tokenDTO.setId(tokenId);
         tokenService.save(tokenDTO);
-        List<String> listRole = userDetail.getAuthorities().stream()
-                .map(role -> role.getAuthority()).collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(tokenDTO.getToken(), tokenDTO.getRefreshToken(), userDetail.getUsername(), userDetail.getName(), listRole));
+        List<String> roles = roleService.findByUser_Id(userDTO.getId()).stream().map(RoleDTO::getName).collect(Collectors.toList());
+
+        return ResponseEntity.ok(new JwtResponse(tokenDTO.getToken(), tokenDTO.getRefreshToken(), userDTO.getUserName(), roles));
     }
 
 

@@ -1,5 +1,6 @@
 package com.thymeleaf.service.impl;
 
+import com.thymeleaf.api.request.AuthRequest;
 import com.thymeleaf.converter.UserConverter;
 import com.thymeleaf.dto.UserDTO;
 import com.thymeleaf.entity.RoleEntity;
@@ -10,6 +11,8 @@ import com.thymeleaf.repository.ITokenRepository;
 import com.thymeleaf.repository.IUserRepository;
 import com.thymeleaf.security.CustomUserDetail;
 import com.thymeleaf.service.IUserService;
+import com.thymeleaf.utils.Provider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,19 +28,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements IUserService {
 
-    @Autowired
-    private IUserRepository userRepository;
+    private final IUserRepository userRepository;
 
-    @Autowired
-    private UserConverter userConverter;
+    private final UserConverter userConverter;
 
-    @Autowired
-    private IRoleRepository roleRepository;
+    private final IRoleRepository roleRepository;
 
-    @Autowired
-    private ITokenRepository tokenRepository;
+    private final ITokenRepository tokenRepository;
+
+    private final PasswordEncoder encoder;
 
     @Override
     public UserDTO findByUserNameAndPassword(UserDTO dto) {
@@ -52,6 +54,12 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public UserDTO findByUserNameAndProviderId(String username, String providerId) {
+        Optional<UserEntity> entities = userRepository.findByUserNameAndProviderId(username, providerId);
+        return entities.map(entity -> userConverter.toDTO(entity)).orElse(null);
+    }
+
+    @Override
     public UserDTO findById(Integer id) {
         Optional<UserEntity> entities = userRepository.findById(id);
         return entities.map(entity -> userConverter.toDTO(entity)).orElse(null);
@@ -59,7 +67,7 @@ public class UserService implements IUserService {
 
     @Override
     public UserDTO save(UserDTO dto) {
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
+//        PasswordEncoder encoder = new BCryptPasswordEncoder();
         UserEntity userEntity = new UserEntity();
         if (dto.getId() != null){
             Optional<UserEntity> optional = userRepository.findById(dto.getId());
@@ -76,12 +84,16 @@ public class UserService implements IUserService {
             userEntity = userConverter.toEntity(dto);
             userEntity.setPassword(encoder.encode(userEntity.getPassword()));
         }
-
+        userEntity.setProviderId(userEntity.getProviderId());
         List<RoleEntity> roles = new ArrayList<>();
-        for (Integer roleId : dto.getRoleIds()){
-            Optional<RoleEntity> optional = roleRepository.findById(roleId);
-            if (optional.isPresent()){
-                roles.add(optional.get());
+        if (dto.getRoleIds() == null){
+            roles.add(roleRepository.findByName("ROLE_EMPLOYEE"));
+        } else {
+            for (Integer roleId : dto.getRoleIds()){
+                Optional<RoleEntity> optional = roleRepository.findById(roleId);
+                if (optional.isPresent()){
+                    roles.add(optional.get());
+                }
             }
         }
         userEntity.setRoles(roles);
@@ -121,13 +133,24 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public CustomUserDetail loadUserByRefreshToken(String refreshToken) {
+    public UserDTO loadUserByRefreshToken(String refreshToken) {
         Optional<TokenEntity> optional = tokenRepository.findByRefreshToken(refreshToken);
         if (optional.isPresent()){
             TokenEntity tokenEntity = optional.get();
             UserEntity userEntity = tokenEntity.getUser();
-            return new CustomUserDetail(userEntity);
+            return userConverter.toDTO(userEntity);
         }
+        return null;
+    }
+
+    @Override
+    public CustomUserDetail loadUserByOAuth2(AuthRequest authRequest) {
+//        Optional<UserEntity> optional = userRepository.findByProviderIdAndProviderUserId(Provider.google.name(), authRequest.getProviderUserId());
+//        if (optional.isPresent()){
+//            UserEntity userEntity = optional.get();
+//            return new CustomUserDetail(userEntity);
+//        }
+
         return null;
     }
 }

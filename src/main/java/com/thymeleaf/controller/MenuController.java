@@ -1,7 +1,7 @@
 package com.thymeleaf.controller;
 
-import com.thymeleaf.api.input.UserInput;
-import com.thymeleaf.api.output.MenuOutput;
+import com.thymeleaf.api.request.UserInput;
+import com.thymeleaf.api.response.MenuOutput;
 import com.thymeleaf.dto.AuthDTO;
 import com.thymeleaf.dto.MenuDTO;
 import com.thymeleaf.dto.RoleDTO;

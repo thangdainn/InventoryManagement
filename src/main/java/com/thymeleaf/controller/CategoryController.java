@@ -1,7 +1,7 @@
 package com.thymeleaf.controller;
 
-import com.thymeleaf.api.input.CategoryInput;
-import com.thymeleaf.api.output.CategoryOutput;
+import com.thymeleaf.api.request.CategoryInput;
+import com.thymeleaf.api.response.CategoryOutput;
 import com.thymeleaf.dto.CategoryDTO;
 import com.thymeleaf.dto.MenuDTO;
 import com.thymeleaf.service.ICategoryService;

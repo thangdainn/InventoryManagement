@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface IUserRepository extends JpaRepository<UserEntity, Integer> {
     Optional<UserEntity> findByUserNameAndPasswordAndActiveFlag(String userName, String password, Integer activeFlag);
     Optional<UserEntity> findByUserNameAndActiveFlag(String userName, Integer activeFlag);
+
+    Optional<UserEntity> findByUserNameAndProviderId(String userName, String providerId);
     Page<UserEntity> findByNameContaining(@Param("keyword") String name, Pageable pageable);
 
     List<UserEntity> findAllByActiveFlag(Integer activeFlag);

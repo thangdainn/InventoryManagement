@@ -1,16 +1,10 @@
 package com.thymeleaf.api;
 
-import com.thymeleaf.api.input.InvoiceInput;
-import com.thymeleaf.api.output.InvoiceOutput;
+import com.thymeleaf.api.request.InvoiceInput;
+import com.thymeleaf.api.response.InvoiceOutput;
 import com.thymeleaf.dto.InvoiceDTO;
-import com.thymeleaf.dto.ProductInfoDTO;
-import com.thymeleaf.service.ICategoryService;
 import com.thymeleaf.service.IInvoiceService;
-import com.thymeleaf.service.IProductService;
-import com.thymeleaf.utils.Constant;
 import com.thymeleaf.utils.TypeInvoice;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -18,23 +12,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/invoice")
+@RequestMapping("/api/invoice")
 public class InvoiceAPI {
 
     @Autowired

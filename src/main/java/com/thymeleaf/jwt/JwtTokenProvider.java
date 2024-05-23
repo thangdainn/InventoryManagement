@@ -13,20 +13,27 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
 @Slf4j
 public class JwtTokenProvider {
+
     private final Key secretKey = new SecretKeySpec(JWTConstant.JWT_SECRET.getBytes(), SignatureAlgorithm.HS256.getJcaName());
 
     //    create jwt from info of User
-    public TokenDTO generateToken(CustomUserDetail customUserDetail) {
+    public TokenDTO generateToken(String username, String providerId) {
         Date currentDate = new Date();
         Date dateExpired = new Date(currentDate.getTime() + JWTConstant.JWT_EXPIRATION);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("username", username);
+        claims.put("providerId", providerId);
 //        create from username
         String token = Jwts.builder()
-                .setSubject(customUserDetail.getUsername())
+                .setClaims(claims)
+                .setSubject(username)
                 .setIssuedAt(currentDate)
                 .setExpiration(dateExpired)
                 .signWith(secretKey)
@@ -50,6 +57,14 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token).getBody();
         return claims.getSubject();
     }
+    public String getProviderIdFromJwt(String token) {
+        if (isTokenExpired(token)) {
+            throw new ExpiredJwtException(null, null, "Token is expired");
+        }
+        Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build()
+                .parseClaimsJws(token).getBody();
+        return claims.get("providerId", String.class);
+    }
 
     public boolean validateToken(String authToken) {
         Jwts.parserBuilder().setSigningKey(secretKey).build()
@@ -66,5 +81,9 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token).getBody();
         Date expiration = claims.getExpiration();
         return expiration.before(new Date());
+    }
+
+    public byte[] getJwtSecret() {
+        return Decoders.BASE64.decode(JWTConstant.JWT_SECRET);
     }
 }
