@@ -11,14 +11,18 @@ import com.thymeleaf.security.CustomUserDetail;
 import com.thymeleaf.service.IRoleService;
 import com.thymeleaf.service.ITokenService;
 import com.thymeleaf.service.IUserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,17 +43,14 @@ public class TokenAPI {
     @Autowired
     private ITokenService tokenService;
 
-
-//    @GetMapping("/token")
-//    public ResponseEntity<?> getToken(@AuthenticationPrincipal OAuth2User oAuth2User) {
-//        Authentication authentication = (Authentication) oAuth2User;
-//        CustomUserDetail customUserDetail = (CustomUserDetail) authentication.getPrincipal();
-//
-//        return ResponseEntity.ok(tokenProvider.generateToken(customUserDetail));
-//    }
     @PostMapping(value = "/refresh-token")
-    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenDTO dto) {
-        TokenDTO tokenDTO = tokenService.findByRefreshToken(dto.getRefreshToken());
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        String bearerRefreshToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (!StringUtils.hasText(bearerRefreshToken) || !bearerRefreshToken.startsWith("Bearer ")){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authorization header is required");
+        }
+        String refreshToken = bearerRefreshToken.substring(7);
+        TokenDTO tokenDTO = tokenService.findByRefreshToken(refreshToken);
         if (tokenDTO == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token is not valid.");
         }
@@ -57,15 +58,15 @@ public class TokenAPI {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token is expired.");
         }
         Integer tokenId = tokenDTO.getId();
-        UserDTO userDTO = userService.loadUserByRefreshToken(dto.getRefreshToken());
-        tokenDTO = tokenProvider.generateToken(userDTO.getUserName(), userDTO.getProviderId());
+        UserDTO userDTO = userService.loadUserByRefreshToken(refreshToken);
+        tokenDTO = tokenProvider.generateToken(userDTO.getUserName(), userDTO.getProviderId(), response);
 //        UserDTO userDTO = userService.findByUserName(userDTO.getUsername(), 1);
         tokenDTO.setUserId(userDTO.getId());
         tokenDTO.setId(tokenId);
         tokenService.save(tokenDTO);
         List<String> roles = roleService.findByUser_Id(userDTO.getId()).stream().map(RoleDTO::getName).collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(tokenDTO.getToken(), tokenDTO.getRefreshToken(), userDTO.getUserName(), roles));
+        return ResponseEntity.ok(new JwtResponse(tokenDTO.getToken(), userDTO.getUserName(), roles));
     }
 
 

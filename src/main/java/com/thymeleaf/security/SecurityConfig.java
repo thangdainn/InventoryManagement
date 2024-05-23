@@ -19,6 +19,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -89,6 +91,9 @@ public class SecurityConfig {
         return new CustomUserDetailService();
     }
 
+    @Autowired
+    public LogoutHandlerService logoutHandlerService;
+
     @Bean
     @Order(1)
     public SecurityFilterChain authSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -102,7 +107,8 @@ public class SecurityConfig {
                         .requestMatchers("/login/oauth2/**","/register", "/signin")
                         .permitAll()
                         .anyRequest().authenticated()
-                );
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 //                .authenticationProvider(authenticationProvider());
 //                .oauth2ResourceServer(oauth2 -> oauth2
 //                        .jwt(jwt -> jwt.decoder(jwtDecoder())
@@ -123,7 +129,8 @@ public class SecurityConfig {
                         .requestMatchers("/refresh-token")
                         .permitAll()
                         .anyRequest().authenticated()
-                );
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
 
@@ -136,7 +143,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
 //                        .requestMatchers("/vendors/**", "/build/**", "/css/**", "/images/**", "/js/**")
 //                        .permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 //                .oauth2Login( oauth2 -> oauth2
@@ -173,6 +182,25 @@ public class SecurityConfig {
 
 //        http.authenticationProvider(authenticationProvider());
 //        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+    @Bean
+    @Order(4)
+    public SecurityFilterChain logoutSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf((csrf) -> csrf.disable())
+                .securityMatcher(new AntPathRequestMatcher("/logout"))
+                .authorizeHttpRequests((requests) -> requests
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .logout((logout) -> logout
+                        .logoutUrl("/logout")
+                        .addLogoutHandler(logoutHandlerService)
+                        .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
+                );
+
         return http.build();
     }
 

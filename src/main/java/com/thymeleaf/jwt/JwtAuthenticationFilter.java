@@ -9,6 +9,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private HandlerExceptionResolver exceptionResolver;
 
@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
+        String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }

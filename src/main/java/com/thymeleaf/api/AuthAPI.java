@@ -13,6 +13,7 @@ import com.thymeleaf.service.IUserService;
 import com.thymeleaf.utils.Provider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,10 +57,10 @@ public class AuthAPI {
 
     private final RestTemplate restTemplate;
 
-    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login/oauth2/google")
-    public ResponseEntity<?> handleGoogleLogin(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public ResponseEntity<?> handleGoogleLogin(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, HttpServletResponse response){
         String accessToken = authorizationHeader.substring(7);
 
         final String userInfoEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo";
@@ -79,16 +81,16 @@ public class AuthAPI {
 
         userDTO = userService.save(userDTO);
         // Generate JWT token and refresh token
-        TokenDTO token = tokenProvider.generateToken(email,userDTO.getProviderId());
+        TokenDTO token = tokenProvider.generateToken(email,userDTO.getProviderId(), response);
         token.setUserId(userDTO.getId());
         tokenService.save(token);
         List<String> roles = roleService.findByUser_Id(userDTO.getId()).stream().map(RoleDTO::getName).collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(token.getToken(), token.getRefreshToken(), userDTO.getUserName(), roles));
+        return ResponseEntity.ok(new JwtResponse(token.getToken(), userDTO.getUserName(), roles));
 
     }
     @PostMapping("/login/oauth2/github")
-    public ResponseEntity<?> handleGithubLogin(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public ResponseEntity<?> handleGithubLogin(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, HttpServletResponse response) throws NoSuchAlgorithmException, InvalidKeySpecException {
         String accessToken = authorizationHeader.substring(7);
 
         final String userInfoEndpoint = "https://api.github.com/user";
@@ -103,22 +105,25 @@ public class AuthAPI {
             userDTO.setProviderId(Provider.github.name());
         }
         if (userDTO.getPassword() == null) {
-            userDTO.setPassword("123");
+            userDTO.setPassword("thangdainn");
         }
         userDTO.setName(username);
         userDTO = userService.save(userDTO);
 
         // Generate JWT token and refresh token
-        TokenDTO token = tokenProvider.generateToken(username, userDTO.getProviderId());
+        TokenDTO token = tokenProvider.generateToken(username, userDTO.getProviderId(), response);
         token.setUserId(userDTO.getId());
         tokenService.save(token);
         List<String> roles = roleService.findByUser_Id(userDTO.getId()).stream().map(RoleDTO::getName).collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(token.getToken(), token.getRefreshToken(), userDTO.getUserName(), roles));
+        return ResponseEntity.ok(new JwtResponse(token.getToken(), userDTO.getUserName(), roles));
 
     }
     @PostMapping("/login/oauth2/facebook")
-    public ResponseEntity<?> handleFacebookLogin(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public ResponseEntity<?> handleFacebookLogin(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, HttpServletResponse response) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        if (!StringUtils.hasText(authorizationHeader) || !authorizationHeader.startsWith("Bearer ")){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authorization header is required");
+        }
         String accessToken = authorizationHeader.substring(7);
 
         final String userInfoEndpoint = "https://graph.facebook.com/me?fields=name,email,picture";
@@ -139,12 +144,12 @@ public class AuthAPI {
         userDTO = userService.save(userDTO);
 
         // Generate JWT token and refresh token
-        TokenDTO token = tokenProvider.generateToken(username, userDTO.getProviderId());
+        TokenDTO token = tokenProvider.generateToken(username, userDTO.getProviderId(), response);
         token.setUserId(userDTO.getId());
         tokenService.save(token);
         List<String> roles = roleService.findByUser_Id(userDTO.getId()).stream().map(RoleDTO::getName).collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(token.getToken(), token.getRefreshToken(), userDTO.getUserName(), roles));
+        return ResponseEntity.ok(new JwtResponse(token.getToken(), userDTO.getUserName(), roles));
 
     }
 
@@ -169,19 +174,16 @@ public class AuthAPI {
     }
 
     @PostMapping(value = "/signin")
-    public ResponseEntity<?> login(@RequestBody LoginRequest user) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword())
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        CustomUserDetail customUserDetail = (CustomUserDetail) authentication.getPrincipal();
-        TokenDTO tokenDTO = tokenProvider.generateToken(customUserDetail.getUsername(), Provider.local.name());
-        UserDTO userDTO = userService.findByUserName(user.getUserName(), 1);
+    public ResponseEntity<?> login(@RequestBody LoginRequest user, HttpServletResponse response) {
+        UserDTO userDTO = userService.findByUserNameAndProviderId(user.getUserName(), Provider.local.name());
+        if (userDTO == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username or password is incorrect");
+        }
+        TokenDTO tokenDTO = tokenProvider.generateToken(user.getUserName(), Provider.local.name(), response);
         tokenDTO.setUserId(userDTO.getId());
         tokenService.save(tokenDTO);
-        List<String> listRole = customUserDetail.getAuthorities().stream()
-                .map(role -> role.getAuthority()).collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(tokenDTO.getToken(), tokenDTO.getRefreshToken(), customUserDetail.getUsername(), listRole));
+        List<String> roles = roleService.findByUser_Id(userDTO.getId()).stream().map(RoleDTO::getName).collect(Collectors.toList());
+        return ResponseEntity.ok(new JwtResponse(tokenDTO.getToken(), userDTO.getUserName(), roles));
     }
 
     private Map<String, Object> getUserInfo(String accessToken, String userInfoEndpoint) {

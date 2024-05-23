@@ -6,6 +6,8 @@ import com.thymeleaf.utils.JWTConstant;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +26,7 @@ public class JwtTokenProvider {
     private final Key secretKey = new SecretKeySpec(JWTConstant.JWT_SECRET.getBytes(), SignatureAlgorithm.HS256.getJcaName());
 
     //    create jwt from info of User
-    public TokenDTO generateToken(String username, String providerId) {
+    public TokenDTO generateToken(String username, String providerId, HttpServletResponse response) {
         Date currentDate = new Date();
         Date dateExpired = new Date(currentDate.getTime() + JWTConstant.JWT_EXPIRATION);
         Map<String, Object> claims = new HashMap<>();
@@ -39,6 +41,7 @@ public class JwtTokenProvider {
                 .signWith(secretKey)
                 .compact();
         String refreshToken = generateRefreshToken();
+        createRefreshTokenCookie(refreshToken, response);
         Date dateExpiredRefreshToken = new Date(currentDate.getTime() + JWTConstant.JWT_EXPIRATION_REFRESH);
         TokenDTO tokenDTO = new TokenDTO();
         tokenDTO.setToken(token);
@@ -83,7 +86,12 @@ public class JwtTokenProvider {
         return expiration.before(new Date());
     }
 
-    public byte[] getJwtSecret() {
-        return Decoders.BASE64.decode(JWTConstant.JWT_SECRET);
+    private Cookie createRefreshTokenCookie(String refreshToken, HttpServletResponse response) {
+        Cookie refreshTokenCookie = new Cookie("refresh_token", refreshToken);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setMaxAge(15 * 24 * 60 * 60);
+        response.addCookie(refreshTokenCookie);
+        return refreshTokenCookie;
     }
 }
