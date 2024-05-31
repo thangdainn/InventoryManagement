@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,14 +144,4 @@ public class UserService implements IUserService {
         return null;
     }
 
-    @Override
-    public CustomUserDetail loadUserByOAuth2(AuthRequest authRequest) {
-//        Optional<UserEntity> optional = userRepository.findByProviderIdAndProviderUserId(Provider.google.name(), authRequest.getProviderUserId());
-//        if (optional.isPresent()){
-//            UserEntity userEntity = optional.get();
-//            return new CustomUserDetail(userEntity);
-//        }
-
-        return null;
-    }
 }

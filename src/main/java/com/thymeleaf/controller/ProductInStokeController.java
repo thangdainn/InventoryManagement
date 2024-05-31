@@ -1,5 +1,6 @@
 package com.thymeleaf.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.thymeleaf.api.request.ProductInStokeInput;
 import com.thymeleaf.api.response.ProductInStokeOutput;
 import com.thymeleaf.dto.CategoryDTO;
@@ -39,7 +40,7 @@ public class ProductInStokeController {
     @GetMapping
     public String showCategory(@ModelAttribute("productInStokes") ProductInStokeInput input,
                                @PageableDefault(size = 5) Pageable pageable,
-                               Model model, HttpSession session) {
+                               Model model, HttpSession session) throws JsonProcessingException {
         ProductInStokeOutput result = new ProductInStokeOutput();
         input.setKeyword(input.getKeyword().trim());
         result.setKeyword(input.getKeyword());

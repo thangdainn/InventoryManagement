@@ -9,32 +9,32 @@ import com.thymeleaf.repository.IProductInStokeRepository;
 import com.thymeleaf.repository.IProductRepository;
 import com.thymeleaf.service.IProductInStokeService;
 import com.thymeleaf.service.IProductService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ProductInStokeService implements IProductInStokeService {
 
-    @Autowired
-    private ProductInStokeConverter productInStokeConverter;
+    private final ProductInStokeConverter productInStokeConverter;
 
-    @Autowired
-    private IProductRepository productRepository;
+    private final IProductRepository productRepository;
 
-    @Autowired
-    private IProductInStokeRepository productInStokeRepository;
+    private final IProductInStokeRepository productInStokeRepository;
 
-    @Autowired
-    private IProductService productService;
+    private final IProductService productService;
 
     @Override
+    @Transactional
     public ProductInStokeDTO save(InvoiceDTO invoiceDTO) {
         ProductInStokeDTO pt = findByProduct_Id(invoiceDTO.getProductId());
         ProductInStokeEntity productInStokeEntity;

@@ -6,7 +6,7 @@ import com.thymeleaf.entity.RoleEntity;
 import com.thymeleaf.repository.IRoleRepository;
 import com.thymeleaf.repository.IUserRepository;
 import com.thymeleaf.service.IRoleService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,16 +18,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class RoleService implements IRoleService {
 
-    @Autowired
-    private IRoleRepository roleRepository;
+    private final IRoleRepository roleRepository;
 
-    @Autowired
-    private RoleConverter roleConverter;
+    private final RoleConverter roleConverter;
 
-    @Autowired
-    private IUserRepository userRepository;
+    private final IUserRepository userRepository;
 
     @Override
     public RoleDTO findByName(RoleDTO dto) {

@@ -11,11 +11,13 @@ import com.thymeleaf.service.IHistoryService;
 import com.thymeleaf.service.IInvoiceService;
 import com.thymeleaf.service.IProductInStokeService;
 import com.thymeleaf.utils.Constant;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -24,24 +26,21 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class InvoiceService implements IInvoiceService {
 
-    @Autowired
-    private InvoiceConverter invoiceConverter;
+    private final InvoiceConverter invoiceConverter;
 
-    @Autowired
-    private IProductRepository productRepository;
+    private final IProductRepository productRepository;
 
-    @Autowired
-    private IInvoiceRepository invoiceRepository;
+    private final IInvoiceRepository invoiceRepository;
 
-    @Autowired
-    private IProductInStokeService productInStokeService;
+    private final IProductInStokeService productInStokeService;
 
-    @Autowired
-    private IHistoryService historyService;
+    private final IHistoryService historyService;
 
     @Override
+    @Transactional
     public InvoiceDTO save(InvoiceDTO dto){
         InvoiceEntity invoiceEntity = new InvoiceEntity();
         Optional<ProductInfoEntity> optional = productRepository.findById(dto.getProductId());

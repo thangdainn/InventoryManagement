@@ -1,4 +1,4 @@
-package com.thymeleaf.payload.request;
+package com.thymeleaf.api.request;
 
 import lombok.Data;
 

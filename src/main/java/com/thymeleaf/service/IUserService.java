@@ -21,5 +21,4 @@ public interface IUserService {
 
     UserDTO loadUserByRefreshToken(String refreshToken);
 
-    CustomUserDetail loadUserByOAuth2(AuthRequest authRequest);
 }

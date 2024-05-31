@@ -1,5 +1,6 @@
 package com.thymeleaf.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.thymeleaf.api.request.ProductInput;
 import com.thymeleaf.api.response.ProductOutput;
 import com.thymeleaf.dto.CategoryDTO;
@@ -56,7 +57,7 @@ public class ProductController {
     }
 
     @GetMapping(value = {"/product/edit/{code}"})
-    public String showCategoryEdit(@PathVariable(name = "code") String code, Model model, HttpSession session) {
+    public String showCategoryEdit(@PathVariable(name = "code") String code, Model model, HttpSession session) throws JsonProcessingException {
         ProductInfoDTO product = new ProductInfoDTO();
         product.setCode(code);
         product = productService.findByCode(product.getCode());

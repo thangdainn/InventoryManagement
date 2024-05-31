@@ -1,27 +1,21 @@
 package com.thymeleaf.api;
 
 import com.thymeleaf.api.request.TokenInput;
-import com.thymeleaf.dto.RefreshTokenDTO;
 import com.thymeleaf.dto.RoleDTO;
 import com.thymeleaf.dto.TokenDTO;
 import com.thymeleaf.dto.UserDTO;
 import com.thymeleaf.jwt.JwtTokenProvider;
-import com.thymeleaf.payload.response.JwtResponse;
-import com.thymeleaf.security.CustomUserDetail;
+import com.thymeleaf.jwt.JwtResponse;
 import com.thymeleaf.service.IRoleService;
 import com.thymeleaf.service.ITokenService;
 import com.thymeleaf.service.IUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 

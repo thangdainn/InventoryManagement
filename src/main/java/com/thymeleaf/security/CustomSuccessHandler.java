@@ -2,9 +2,6 @@ package com.thymeleaf.security;
 
 import com.thymeleaf.dto.*;
 import com.thymeleaf.jwt.JwtTokenProvider;
-import com.thymeleaf.payload.response.JwtResponse;
-import com.thymeleaf.repository.IAuthRepository;
-import com.thymeleaf.repository.IRoleRepository;
 import com.thymeleaf.service.*;
 import com.thymeleaf.utils.Constant;
 import com.thymeleaf.utils.SecurityUtil;
@@ -26,7 +23,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter

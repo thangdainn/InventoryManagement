@@ -5,6 +5,7 @@ import com.thymeleaf.dto.MenuDTO;
 import com.thymeleaf.entity.MenuEntity;
 import com.thymeleaf.repository.IMenuRepository;
 import com.thymeleaf.service.IMenuService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,13 +17,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class MenuService implements IMenuService {
 
-    @Autowired
-    private IMenuRepository menuRepository;
+    private final IMenuRepository menuRepository;
 
-    @Autowired
-    private MenuConverter menuConverter;
+    private final MenuConverter menuConverter;
 
     @Override
     public MenuDTO findById(Integer id) {

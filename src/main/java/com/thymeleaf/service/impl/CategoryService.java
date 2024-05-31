@@ -5,6 +5,7 @@ import com.thymeleaf.dto.CategoryDTO;
 import com.thymeleaf.entity.CategoryEntity;
 import com.thymeleaf.repository.ICategoryRepository;
 import com.thymeleaf.service.ICategoryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -17,13 +18,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService implements ICategoryService {
 
-    @Autowired
-    private CategoryConverter categoryConverter;
+    private final CategoryConverter categoryConverter;
 
-    @Autowired
-    private ICategoryRepository categoryRepository;
+    private final ICategoryRepository categoryRepository;
 
 
     @Override

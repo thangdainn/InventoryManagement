@@ -7,6 +7,7 @@ import com.thymeleaf.repository.IAuthRepository;
 import com.thymeleaf.repository.IMenuRepository;
 import com.thymeleaf.repository.IRoleRepository;
 import com.thymeleaf.service.IAuthService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,19 +16,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService implements IAuthService {
 
-    @Autowired
-    private IAuthRepository authRepository;
+    private final IAuthRepository authRepository;
 
-    @Autowired
-    private AuthConverter authConverter;
+    private final AuthConverter authConverter;
 
-    @Autowired
-    private IRoleRepository roleRepository;
+    private final IRoleRepository roleRepository;
 
-    @Autowired
-    private IMenuRepository menuRepository;
+    private final IMenuRepository menuRepository;
 
     @Override
     public List<AuthDTO> findByRole_Id(Integer id) {
@@ -47,7 +45,7 @@ public class AuthService implements IAuthService {
 
     @Override
     public AuthDTO save(AuthDTO dto) {
-        AuthEntity authEntity = new AuthEntity();
+        AuthEntity authEntity;
         Optional<AuthEntity> optional = authRepository.findByRole_IdAndMenu_Id(dto.getRoleId(), dto.getMenuId());
         if (optional.isPresent()){
             AuthEntity old = optional.get();

@@ -1,5 +1,6 @@
 package com.thymeleaf.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.thymeleaf.api.request.InvoiceInput;
 import com.thymeleaf.api.response.InvoiceOutput;
 import com.thymeleaf.dto.CategoryDTO;
@@ -48,7 +49,7 @@ public class InvoiceController {
     public String showInvoice(@ModelAttribute("invoices") InvoiceInput input,
                                @PageableDefault(size = 5) Pageable pageable,
                                Model model, HttpSession session,
-                               HttpServletRequest request) {
+                               HttpServletRequest request) throws JsonProcessingException {
         InvoiceOutput result = new InvoiceOutput();
         Integer type = checkType(request, result);
         input.setKeyword(input.getKeyword().trim());
@@ -117,7 +118,7 @@ public class InvoiceController {
     }
 
     @GetMapping(value = {"/export"})
-    public ModelAndView exportReport(HttpServletRequest request){
+    public ModelAndView exportReport(HttpServletRequest request) throws JsonProcessingException {
         Integer type = checkType(request, null);
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.addObject("type", type);

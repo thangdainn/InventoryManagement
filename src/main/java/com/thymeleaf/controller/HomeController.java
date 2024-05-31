@@ -1,15 +1,13 @@
 package com.thymeleaf.controller;
 
 import com.thymeleaf.dto.MenuDTO;
-import com.thymeleaf.payload.response.JwtResponse;
+import com.thymeleaf.jwt.JwtResponse;
 import com.thymeleaf.security.oauth2.OAuth2UserDetail;
 import com.thymeleaf.utils.Constant;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

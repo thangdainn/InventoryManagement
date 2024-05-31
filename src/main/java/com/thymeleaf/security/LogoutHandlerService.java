@@ -23,5 +23,6 @@ public class LogoutHandlerService implements LogoutHandler {
         }
         final String refreshToken = authHeader.substring(7);
         tokenRepository.deleteByRefreshToken(refreshToken);
+
     }
 }

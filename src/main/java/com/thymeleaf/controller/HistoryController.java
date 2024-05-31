@@ -1,5 +1,6 @@
 package com.thymeleaf.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.thymeleaf.api.request.HistoryInput;
 import com.thymeleaf.api.response.HistoryOutput;
 import com.thymeleaf.dto.CategoryDTO;
@@ -39,7 +40,7 @@ public class HistoryController {
     @GetMapping
     public String showCategory(@ModelAttribute("histories") HistoryInput input,
                                @PageableDefault(size = 5) Pageable pageable,
-                               Model model, HttpSession session) {
+                               Model model, HttpSession session) throws JsonProcessingException {
         HistoryOutput result = new HistoryOutput();
         input.setKeyword(input.getKeyword().trim());
         result.setKeyword(input.getKeyword());

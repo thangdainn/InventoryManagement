@@ -1,17 +1,17 @@
 package com.thymeleaf.dto;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Slf4j
 public class ProductInfoDTO extends AbstractDTO<ProductInfoDTO>{
 
     @NotNull(message = "Category is required")
@@ -29,4 +29,5 @@ public class ProductInfoDTO extends AbstractDTO<ProductInfoDTO>{
     private String imgUrl;
 
     private MultipartFile multipartFile;
+
 }

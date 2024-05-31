@@ -69,6 +69,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
 
             }
+            log.info("JwtAuthenticationFilter done");
+
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {

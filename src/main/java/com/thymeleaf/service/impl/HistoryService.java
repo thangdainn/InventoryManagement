@@ -10,6 +10,7 @@ import com.thymeleaf.repository.IHistoryRepository;
 import com.thymeleaf.repository.IProductInStokeRepository;
 import com.thymeleaf.repository.IProductRepository;
 import com.thymeleaf.service.IHistoryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,22 +22,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class HistoryService implements IHistoryService {
 
-    @Autowired
-    private ProductInStokeConverter productInStokeConverter;
 
-    @Autowired
-    private IProductRepository productRepository;
+    private final IProductRepository productRepository;
 
-    @Autowired
-    private IProductInStokeRepository productInStokeRepository;
 
-    @Autowired
-    private HistoryConverter historyConverter;
+    private final HistoryConverter historyConverter;
 
-    @Autowired
-    private IHistoryRepository historyRepository;
+    private final IHistoryRepository historyRepository;
 
     @Override
     public HistoryDTO save(InvoiceDTO invoiceDTO, String action){

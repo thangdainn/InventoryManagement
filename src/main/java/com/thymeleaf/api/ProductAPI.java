@@ -1,5 +1,6 @@
 package com.thymeleaf.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.thymeleaf.api.request.ProductInput;
 import com.thymeleaf.api.response.ProductOutput;
 import com.thymeleaf.dto.*;
@@ -67,7 +68,7 @@ public class ProductAPI {
     }
 
     @GetMapping(value = {"/{code}"})
-    public ResponseEntity<ProductInfoDTO> getProduct(@PathVariable(name = "code") String code) {
+    public ResponseEntity<ProductInfoDTO> getProduct(@PathVariable(name = "code") String code) throws JsonProcessingException {
         ProductInfoDTO product = productService.findByCode(code);
         if (product == null){
             throw new RuntimeException("Product is not found");

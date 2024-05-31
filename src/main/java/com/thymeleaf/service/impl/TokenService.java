@@ -7,6 +7,7 @@ import com.thymeleaf.entity.UserEntity;
 import com.thymeleaf.repository.ITokenRepository;
 import com.thymeleaf.repository.IUserRepository;
 import com.thymeleaf.service.ITokenService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,16 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TokenService implements ITokenService {
 
-    @Autowired
-    private ITokenRepository tokenRepository;
+    private final ITokenRepository tokenRepository;
 
-    @Autowired
-    private TokenConverter tokenConverter;
+    private final TokenConverter tokenConverter;
 
-    @Autowired
-    private IUserRepository userRepository;
+    private final IUserRepository userRepository;
 
     @Override
     public TokenDTO findById(Integer id) {
